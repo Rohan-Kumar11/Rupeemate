@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { PlusCircle, TrendingUp, TrendingDown, Wallet, PiggyBank, CreditCard, X, Edit2, Trash2, Download, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+// FIX 1: Removed unused `useRouter` import
+import { PlusCircle, TrendingUp, TrendingDown, Wallet, PiggyBank, CreditCard, X, Edit2, Trash2, Download, ArrowUpRight, ArrowDownRight, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface Transaction {
@@ -15,8 +15,11 @@ interface Transaction {
 
 const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899'];
 
+// FIX 2: Helper to get today's date as a string
+const today = () => new Date().toISOString().split('T')[0];
+
 export default function FinanceDashboard() {
-  const router = useRouter();
+  // FIX 1: Removed `const router = useRouter();`
   const [mounted, setMounted] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([
     { id: 1, type: 'income', category: 'Salary', amount: 50000, date: '2026-01-20', description: 'Monthly salary' },
@@ -26,16 +29,21 @@ export default function FinanceDashboard() {
     { id: 5, type: 'expense', category: 'Entertainment', amount: 1500, date: '2026-01-16', description: 'Movies and streaming' },
     { id: 6, type: 'borrow', category: 'Personal Loan', amount: 5000, date: '2026-01-15', description: 'Borrowed from friend' },
     { id: 7, type: 'lend', category: 'Loan Given', amount: 2000, date: '2026-01-14', description: 'Lent to colleague' },
-    
   ]);
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [formError, setFormError] = useState(''); // FIX 9: Replace alert() with inline error
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null); // FIX 9: Replace confirm() with modal
+  // FIX 10 (page): pagination state instead of silent slice
+  const [visibleCount, setVisibleCount] = useState(10);
+
+  // FIX 2 & 10: Use today() for the form default date
   const [formData, setFormData] = useState<Omit<Transaction, 'id'>>({
     type: 'expense',
     category: '',
     amount: 0,
-    date: '2026-01-25',
+    date: today(),
     description: ''
   });
 
@@ -54,8 +62,11 @@ export default function FinanceDashboard() {
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
   const totalBorrow = transactions.filter(t => t.type === 'borrow').reduce((sum, t) => sum + t.amount, 0);
   const totalLend = transactions.filter(t => t.type === 'lend').reduce((sum, t) => sum + t.amount, 0);
-  const netBalance = totalIncome - totalExpense + totalBorrow - totalLend;
-  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome * 100).toFixed(1) : 0;
+
+  // FIX 6: Net balance should only use income/expense — not borrow/lend
+  const netBalance = totalIncome - totalExpense;
+  // FIX 7: Consistent string type for savingsRate
+  const savingsRate: string = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome * 100).toFixed(1) : '0.0';
 
   const expenseByCategory = transactions
     .filter(t => t.type === 'expense')
@@ -66,33 +77,37 @@ export default function FinanceDashboard() {
 
   const pieData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
 
+  // FIX 8: Group by month (YYYY-MM) instead of full date for a meaningful trend chart
   const monthlyTrend = transactions
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .reduce((acc, t) => {
-      const date = t.date;
-      if (!acc[date]) {
-        acc[date] = { date, income: 0, expense: 0 };
+      const month = t.date.slice(0, 7); // e.g. "2026-01"
+      if (!acc[month]) {
+        acc[month] = { date: month, income: 0, expense: 0 };
       }
-      if (t.type === 'income') acc[date].income += t.amount;
-      if (t.type === 'expense') acc[date].expense += t.amount;
+      if (t.type === 'income') acc[month].income += t.amount;
+      if (t.type === 'expense') acc[month].expense += t.amount;
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, { date: string; income: number; expense: number }>);
 
   const trendData = Object.values(monthlyTrend);
 
   const handleSubmit = () => {
+    // FIX 9: Replace alert() with inline form error
     if (!formData.category || !formData.amount || !formData.description) {
-      alert('Please fill in all fields');
+      setFormError('Please fill in all fields.');
       return;
     }
-    
+    setFormError('');
+
     if (editingId) {
       setTransactions(transactions.map(t => t.id === editingId ? { ...formData, id: editingId } : t));
       setEditingId(null);
     } else {
+      // FIX 3: Safe Math.max with 0 as first argument to handle empty array
       const newTransaction: Transaction = {
         ...formData,
-        id: Math.max(...transactions.map(t => t.id), 0) + 1
+        id: Math.max(0, ...transactions.map(t => t.id)) + 1
       };
       setTransactions([newTransaction, ...transactions]);
     }
@@ -100,12 +115,14 @@ export default function FinanceDashboard() {
     resetForm();
   };
 
+  // FIX 2 & 10: resetForm uses today() — not a hardcoded date
   const resetForm = () => {
+    setFormError('');
     setFormData({
       type: 'expense',
       category: '',
       amount: 0,
-      date: '2026-01-25',
+      date: today(),
       description: ''
     });
   };
@@ -119,12 +136,19 @@ export default function FinanceDashboard() {
       description: transaction.description
     });
     setEditingId(transaction.id);
+    setFormError('');
     setShowModal(true);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this transaction?')) {
-      setTransactions(transactions.filter(t => t.id !== id));
+  // FIX 9: Replace window.confirm() with an in-UI confirmation modal
+  const handleDeleteRequest = (id: number) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteConfirmId !== null) {
+      setTransactions(transactions.filter(t => t.id !== deleteConfirmId));
+      setDeleteConfirmId(null);
     }
   };
 
@@ -133,7 +157,7 @@ export default function FinanceDashboard() {
       ['Date', 'Type', 'Category', 'Amount', 'Description'],
       ...transactions.map(t => [t.date, t.type, t.category, t.amount.toString(), t.description])
     ].map(row => row.join(',')).join('\n');
-    
+
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -189,6 +213,7 @@ export default function FinanceDashboard() {
             </div>
           </div>
 
+          {/* FIX 6: Net balance now excludes borrow/lend */}
           <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
             <div className="flex justify-between items-start mb-4">
               <div>
@@ -201,6 +226,7 @@ export default function FinanceDashboard() {
             </div>
             <div className="flex items-center text-blue-600 text-sm">
               <PiggyBank size={16} />
+              {/* FIX 7: savingsRate is consistently a string now */}
               <span className="ml-1">{savingsRate}% savings rate</span>
             </div>
           </div>
@@ -223,7 +249,7 @@ export default function FinanceDashboard() {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Expense Breakdown */}
+          {/* FIX 8 (pie): Removed overflowing inline labels — use Legend + Tooltip only */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Expense Breakdown</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -232,8 +258,6 @@ export default function FinanceDashboard() {
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
@@ -242,12 +266,18 @@ export default function FinanceDashboard() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} />
+                <Tooltip
+  formatter={(value) => {
+    const numericValue = typeof value === 'number' ? value : Number(value ?? 0);
+    return `₹${numericValue.toLocaleString()}`;
+  }}
+/>
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Income vs Expense Trend */}
+          {/* FIX 8: Trend now groups by month */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Income vs Expense Trend</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -255,7 +285,12 @@ export default function FinanceDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} />
+                <Tooltip
+                  formatter={(value: number | string | undefined) => {
+                    const numericValue = typeof value === 'number' ? value : Number(value ?? 0);
+                    return `₹${numericValue.toLocaleString()}`;
+                  }}
+                />
                 <Legend />
                 <Line type="monotone" dataKey="income" stroke="#10b981" strokeWidth={2} name="Income" />
                 <Line type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={2} name="Expense" />
@@ -284,7 +319,13 @@ export default function FinanceDashboard() {
 
         {/* Recent Transactions */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Transactions</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold text-gray-800">Recent Transactions</h3>
+            {/* FIX 4: Show count indicator instead of silently truncating */}
+            <span className="text-sm text-gray-500">
+              Showing {Math.min(visibleCount, transactions.length)} of {transactions.length}
+            </span>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -298,7 +339,8 @@ export default function FinanceDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {transactions.slice(0, 10).map((transaction) => (
+                {/* FIX 4: Use visibleCount state for controlled pagination */}
+                {transactions.slice(0, visibleCount).map((transaction) => (
                   <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                     <td className="py-3 px-4 text-gray-700">{transaction.date}</td>
                     <td className="py-3 px-4">
@@ -329,8 +371,9 @@ export default function FinanceDashboard() {
                         >
                           <Edit2 size={18} />
                         </button>
+                        {/* FIX 9: Use in-UI confirmation instead of window.confirm() */}
                         <button
-                          onClick={() => handleDelete(transaction.id)}
+                          onClick={() => handleDeleteRequest(transaction.id)}
                           className="text-red-600 hover:text-red-800 transition"
                         >
                           <Trash2 size={18} />
@@ -342,9 +385,31 @@ export default function FinanceDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* FIX 4: Load more / show less controls */}
+          {transactions.length > 10 && (
+            <div className="mt-4 flex gap-3 justify-center">
+              {visibleCount < transactions.length && (
+                <button
+                  onClick={() => setVisibleCount(v => v + 10)}
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  Load more
+                </button>
+              )}
+              {visibleCount > 10 && (
+                <button
+                  onClick={() => setVisibleCount(10)}
+                  className="text-gray-500 hover:underline text-sm"
+                >
+                  Show less
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Modal */}
+        {/* Add/Edit Transaction Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
@@ -363,13 +428,21 @@ export default function FinanceDashboard() {
                   <X size={24} />
                 </button>
               </div>
-              
+
+              {/* FIX 9: Inline form error instead of alert() */}
+              {formError && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                  <AlertTriangle size={16} />
+                  {formError}
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2">Type</label>
                   <select
                     value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value as any, category: '' })}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value as Transaction['type'], category: '' })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                   >
                     <option value="income">Income</option>
@@ -430,6 +503,35 @@ export default function FinanceDashboard() {
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transition"
                 >
                   {editingId ? 'Update Transaction' : 'Add Transaction'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* FIX 9: Delete Confirmation Modal — replaces window.confirm() */}
+        {deleteConfirmId !== null && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="bg-red-100 p-4 rounded-full">
+                  <Trash2 className="text-red-600" size={28} />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Delete Transaction?</h3>
+              <p className="text-gray-600 mb-6">This action cannot be undone.</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
+                >
+                  Delete
                 </button>
               </div>
             </div>

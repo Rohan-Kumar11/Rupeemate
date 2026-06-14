@@ -24,7 +24,7 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
   }>;
 }
 
-export default function SIPCalculator(): TSX.Element {
+export default function SIPCalculator(): React.JSX.Element {
   const [monthlyInvestment, setMonthlyInvestment] = useState<number>(5000);
   const [expectedReturn, setExpectedReturn] = useState<number>(12);
   const [timePeriod, setTimePeriod] = useState<number>(10);
@@ -105,7 +105,7 @@ export default function SIPCalculator(): TSX.Element {
     }).format(amount);
   };
 
-  const CustomTooltip = ({ active, payload }: CustomTooltipProps): JSX.Element | null => {
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps): React.JSX.Element | null => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-gray-900 text-white p-3 rounded-lg shadow-xl border border-gray-700">

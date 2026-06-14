@@ -2,21 +2,45 @@
 import React, { useState, useEffect } from 'react';
 import { Search, TrendingUp, TrendingDown, Filter, ArrowUpRight, ArrowDownRight, Star, Eye, Plus, Minus, DollarSign, PieChart, BarChart3, Calculator, Bell, RefreshCw, Download, Share2, User, Settings, LogOut, Activity, Briefcase, History, Target, ChevronDown, ChevronUp, X, Info, AlertCircle, CheckCircle, TrendingUpDown } from 'lucide-react';
 
+interface Fund {
+  id: number;
+  name: string;
+  category: string;
+  nav: number;
+  change: number;
+  changePercent: number;
+  returns: Record<'1m' | '6m' | '1y' | '3y' | '5y', number>;
+  rating: number;
+  aum: string;
+  expenseRatio: number;
+  minInvestment: number;
+  riskLevel: string;
+  exitLoad: string;
+  fundManager: string;
+  benchmarkIndex: string;
+  sipAllowed: boolean;
+  dividendOption: boolean;
+  lockInPeriod: string;
+  launchDate: string;
+}
+
+type SortOption = 'returns' | 'nav' | 'rating' | 'aum';
+
 const MutualFundsPlatform = () => {
-  const [selectedTab, setSelectedTab] = useState('explore');
+  const [selectedTab, setSelectedTab] = useState<'explore' | 'watchlist'>('explore');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [watchlist, setWatchlist] = useState([1, 3]);
-  const [selectedFund, setSelectedFund] = useState(null);
+  const [watchlist, setWatchlist] = useState<number[]>([1, 3]);
+  const [selectedFund, setSelectedFund] = useState<Fund | null>(null);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [sortBy, setSortBy] = useState('returns');
+  const [sortBy, setSortBy] = useState<SortOption>('returns');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
-  const [comparisonFunds, setComparisonFunds] = useState([]);
+  const [comparisonFunds, setComparisonFunds] = useState<number[]>([]);
   const [showProfile, setShowProfile] = useState(false);
   const [investmentAmount, setInvestmentAmount] = useState(10000);
   const [showInvestModal, setShowInvestModal] = useState(false);
-  const [investmentType, setInvestmentType] = useState('lumpsum');
+  const [investmentType, setInvestmentType] = useState<'lumpsum' | 'sip'>('lumpsum');
 
   const [userProfile] = useState({
     name: 'Rajesh Kumar',
@@ -36,7 +60,7 @@ const MutualFundsPlatform = () => {
     { id: 4, type: 'info', title: 'New Fund', message: 'Mirae Asset launched a new Flexi Cap fund', time: '2 days ago' }
   ]);
 
-  const [funds, setFunds] = useState([
+  const [funds, setFunds] = useState<Fund[]>([
     {
       id: 1,
       name: 'HDFC Top 100 Fund',
@@ -270,7 +294,7 @@ const MutualFundsPlatform = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const toggleWatchlist = (fundId) => {
+  const toggleWatchlist = (fundId: number) => {
     setWatchlist(prev => 
       prev.includes(fundId) 
         ? prev.filter(id => id !== fundId)
@@ -278,19 +302,19 @@ const MutualFundsPlatform = () => {
     );
   };
 
-  const addToComparison = (fundId) => {
+  const addToComparison = (fundId: number) => {
     if (comparisonFunds.length < 4 && !comparisonFunds.includes(fundId)) {
       setComparisonFunds([...comparisonFunds, fundId]);
     }
   };
 
-  const removeFromComparison = (fundId) => {
+  const removeFromComparison = (fundId: number) => {
     setComparisonFunds(comparisonFunds.filter(id => id !== fundId));
   };
 
   const categories = ['all', 'Large Cap', 'Mid Cap', 'Small Cap', 'Large & Mid Cap', 'Flexi Cap', 'Sectoral', 'Debt', 'Index Fund', 'ELSS', 'International'];
 
-  const sortFunds = (funds) => {
+  const sortFunds = (funds: Fund[]) => {
     switch (sortBy) {
       case 'returns':
         return [...funds].sort((a, b) => b.returns['1y'] - a.returns['1y']);
@@ -305,14 +329,14 @@ const MutualFundsPlatform = () => {
     }
   };
 
-  const filteredFunds = sortFunds(funds.filter(fund => {
+  const filteredFunds = sortFunds(funds.filter((fund: Fund) => {
     const matchesSearch = fund.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           fund.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || fund.category === selectedCategory;
     return matchesSearch && matchesCategory;
   }));
 
-  const FundCard = ({ fund, showActions = true }) => (
+  const FundCard = ({ fund, showActions = true }: { fund: Fund; showActions?: boolean }) => (
     <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
@@ -393,7 +417,7 @@ const MutualFundsPlatform = () => {
           </div>
           <select 
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
             className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
           >
             <option value="returns">Sort by Returns</option>
@@ -626,7 +650,7 @@ const MutualFundsPlatform = () => {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setSelectedTab(tab.id)}
+                onClick={() => setSelectedTab(tab.id as 'explore' | 'watchlist')}
                 className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
                   selectedTab === tab.id
                     ? 'bg-blue-600 text-white'
@@ -752,7 +776,7 @@ const MutualFundsPlatform = () => {
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3">Returns Performance</h3>
                 <div className="grid grid-cols-5 gap-2">
-                  {['1m', '6m', '1y', '3y', '5y'].map(period => (
+                  {(['1m', '6m', '1y', '3y', '5y'] as const).map(period => (
                     <div key={period} className="text-center p-3 bg-green-50 rounded-lg">
                       <p className="text-xs text-gray-600">{period.toUpperCase()}</p>
                       <p className="text-lg font-bold text-green-600">{selectedFund.returns[period]}%</p>

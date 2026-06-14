@@ -283,7 +283,7 @@ const SWPCalculator: React.FC = () => {
                 tickFormatter={(value) => formatCurrency(value)}
               />
               <Tooltip 
-                formatter={(value: number) => formatCurrency(value)}
+                formatter={(value: number | string | undefined) => formatCurrency(Number(value ?? 0))}
                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
               />
               <Legend />
