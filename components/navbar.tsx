@@ -224,16 +224,8 @@ const Navbar = () => {
                 <span>AI-planner</span>
                 <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               </button>
-              <button onClick={() => router.push('/challenges')} className="relative group text-slate-300 hover:text-emerald-400 transition-colors">
-                <span>Challenges</span>
-                <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-              </button>
               <button onClick={() => router.push('/hub')} className="relative group text-slate-300 hover:text-emerald-400 transition-colors">
                 <span>Hub</span>
-                <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-              </button>
-              <button onClick={() => router.push('/leaderboard')} className="relative group text-slate-300 hover:text-emerald-400 transition-colors">
-                <span>Leaderboard</span>
                 <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               </button>
               <button onClick={() => router.push('/manager')} className="relative group text-slate-300 hover:text-emerald-400 transition-colors">
