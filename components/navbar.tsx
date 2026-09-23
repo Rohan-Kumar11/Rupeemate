@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, User, ChevronDown, LogOut, Settings, CreditCard, PiggyBank, TrendingUp, Calculator, DollarSign, Sparkles } from 'lucide-react';
+import { Wallet, User, ChevronDown, LogOut, Settings, CreditCard, PiggyBank, TrendingUp, Calculator, DollarSign, Sparkles, Menu, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -35,6 +35,13 @@ const calculators = [
   }
 ];
 
+const navLinks = [
+  { label: 'Hub', href: '/hub' },
+  { label: 'Manager', href: '/manager' },
+  { label: 'Goals', href: '/goals' },
+  { label: 'Tax', href: '/tax' },
+];
+
 const Navbar = () => {
   const router = useRouter();
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -43,6 +50,8 @@ const Navbar = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showCalculatorDropdown, setShowCalculatorDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [mobileFeaturesOpen, setMobileFeaturesOpen] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -58,6 +67,18 @@ const Navbar = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Lock body scroll while the mobile drawer is open
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showMobileMenu]);
 
   const checkUser = async () => {
     try {
@@ -115,6 +136,7 @@ const Navbar = () => {
       
       setUser(null);
       setShowProfileMenu(false);
+      setShowMobileMenu(false);
       router.push('/');
       router.refresh();
     } catch (err) {
@@ -126,6 +148,7 @@ const Navbar = () => {
     setIsSignIn(isSignInMode);
     setShowAuthModal(true);
     setShowForgotPassword(false);
+    setShowMobileMenu(false);
   };
 
   const openForgotPassword = () => {
@@ -142,6 +165,12 @@ const Navbar = () => {
     setShowForgotPassword(false);
     setShowAuthModal(true);
     setIsSignIn(true);
+  };
+
+  const goTo = (href: string) => {
+    router.push(href);
+    setShowMobileMenu(false);
+    setMobileFeaturesOpen(false);
   };
 
   return (
@@ -209,8 +238,6 @@ const Navbar = () => {
                           );
                         })}
                       </div>
-
-                      
                     </div>
                   </div>
                 )}
@@ -224,17 +251,21 @@ const Navbar = () => {
                 <span>AI-planner</span>
                 <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               </button>
-              <button onClick={() => router.push('/hub')} className="relative group text-slate-300 hover:text-emerald-400 transition-colors">
-                <span>Hub</span>
-                <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-              </button>
-              <button onClick={() => router.push('/manager')} className="relative group text-slate-300 hover:text-emerald-400 transition-colors">
-                <span>Manager</span>
-                <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-              </button>
+
+              {navLinks.map((link) => (
+                <button
+                  key={link.href}
+                  onClick={() => router.push(link.href)}
+                  className="relative group text-slate-300 hover:text-emerald-400 transition-colors"
+                >
+                  <span>{link.label}</span>
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                </button>
+              ))}
             </div>
 
-            <div className="flex items-center space-x-4">
+            {/* Desktop right-side actions */}
+            <div className="hidden md:flex items-center space-x-4">
               {!user ? (
                 <>
                   <button
@@ -311,9 +342,187 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+
+            {/* Mobile: avatar (if signed in) + hamburger trigger */}
+            <div className="flex md:hidden items-center space-x-3">
+              {user && (
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+              )}
+              <button
+                onClick={() => setShowMobileMenu(true)}
+                aria-label="Open menu"
+                aria-expanded={showMobileMenu}
+                className="relative w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/15 to-teal-500/15 border border-emerald-500/30 flex items-center justify-center active:scale-90 transition-transform"
+              >
+                <Menu className="w-5 h-5 text-emerald-400" />
+              </button>
+            </div>
           </div>
         </div>
       </nav>
+
+      {/* Mobile drawer + backdrop */}
+      <div
+        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${
+          showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowMobileMenu(false)}
+        />
+
+        <div
+          className={`absolute top-0 right-0 h-full w-[84%] max-w-sm bg-slate-900 border-l border-emerald-500/20 shadow-2xl shadow-black/60 flex flex-col transition-transform duration-300 ease-out ${
+            showMobileMenu ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Drawer header */}
+          <div className="flex items-center justify-between px-5 h-16 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
+            <div className="flex items-center space-x-2">
+              <div className="bg-gradient-to-br from-emerald-400 to-teal-500 p-1.5 rounded-lg">
+                <Wallet className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                RupeeMate
+              </span>
+            </div>
+            <button
+              onClick={() => setShowMobileMenu(false)}
+              aria-label="Close menu"
+              className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center active:scale-90 transition-transform"
+            >
+              <X className="w-5 h-5 text-slate-300" />
+            </button>
+          </div>
+
+          {/* Drawer body */}
+          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-1">
+            {user && (
+              <div className="mb-4 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+                <p className="text-xs text-slate-400">Signed in as</p>
+                <p className="text-sm font-medium text-white truncate">{user.email}</p>
+              </div>
+            )}
+
+            {/* Features accordion */}
+            <button
+              onClick={() => setMobileFeaturesOpen(!mobileFeaturesOpen)}
+              className="w-full flex items-center justify-between py-3.5 px-1 text-slate-200 font-medium border-b border-slate-800"
+            >
+              <span className="flex items-center space-x-3">
+                <Calculator className="w-4 h-4 text-emerald-400" />
+                <span>Features</span>
+              </span>
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${mobileFeaturesOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div
+              className={`grid transition-all duration-300 ease-out ${
+                mobileFeaturesOpen ? 'grid-rows-[1fr] opacity-100 py-2' : 'grid-rows-[0fr] opacity-0'
+              }`}
+              style={{ display: 'grid' }}
+            >
+              <div className="overflow-hidden">
+                <div className="space-y-2 pb-2">
+                  {calculators.map((calc) => {
+                    const Icon = calc.icon;
+                    return (
+                      <button
+                        key={calc.id}
+                        onClick={() => goTo(calc.href)}
+                        className="w-full flex items-center space-x-3 p-3 rounded-lg bg-slate-800/60 border border-slate-700/60 active:border-emerald-500/60 transition-colors"
+                      >
+                        <div className={`w-9 h-9 shrink-0 rounded-lg bg-gradient-to-br ${calc.color} p-2`}>
+                          <Icon className="w-full h-full text-white" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-semibold text-white">{calc.name}</p>
+                          <p className="text-xs text-slate-400">{calc.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => goTo('/ai-planner')}
+              className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-200 font-medium border-b border-slate-800"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>AI-planner</span>
+            </button>
+
+            {navLinks.map((link) => (
+              <button
+                key={link.href}
+                onClick={() => goTo(link.href)}
+                className="w-full text-left py-3.5 px-1 text-slate-200 font-medium border-b border-slate-800"
+              >
+                {link.label}
+              </button>
+            ))}
+
+            {user && (
+              <>
+                <button
+                  onClick={() => goTo('/profile')}
+                  className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-300 border-b border-slate-800"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Profile</span>
+                </button>
+                <button
+                  onClick={() => goTo('/savings')}
+                  className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-300 border-b border-slate-800"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>My Savings</span>
+                </button>
+                <button
+                  onClick={() => goTo('/settings')}
+                  className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-300 border-b border-slate-800"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Drawer footer actions */}
+          <div className="px-5 py-5 border-t border-slate-800">
+            {!user ? (
+              <div className="space-y-2">
+                <button
+                  onClick={() => openModal(false)}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-lg font-medium active:scale-[0.98] transition-transform"
+                >
+                  Get Started
+                </button>
+                <button
+                  onClick={() => openModal(true)}
+                  className="w-full text-slate-300 px-6 py-3 rounded-lg font-medium border border-slate-700"
+                >
+                  Sign In
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center justify-center space-x-2 text-red-400 px-6 py-3 rounded-lg font-medium border border-red-500/20 bg-red-500/5 active:scale-[0.98] transition-transform"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       <AuthModal
         showAuthModal={showAuthModal}

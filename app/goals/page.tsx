@@ -2,554 +2,348 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle,
-  CheckCircle2,
-  FileText,
   Plus,
   Trash2,
+  Target,
+  Zap,
+  PiggyBank,
+  Sparkles,
   TrendingUp,
 } from "lucide-react";
 
-import type { TaxRecord, TaxChecklist } from "@/types/financial";
+// If you keep a shared types file, move this into it (e.g. "@/types/financial").
+// Left local here so this file drops in standalone.
+export type SavingsGoal = {
+  id: string;
+  name: string;
+  category: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string;
+  autoSaveEnabled: boolean;
+  autoSaveAmount: number;
+  autoSaveFrequency: "daily" | "weekly";
+  notes?: string;
+};
 
-const defaultRecords: TaxRecord[] = [
+const categoryColor: Record<string, string> = {
+  "Emergency Fund": "#E8871E",
+  "Vehicle & Equipment": "#2E8B7A",
+  "Rent Buffer": "#7A5FD9",
+  "Health & Insurance": "#D9536F",
+  "Skill & Tools": "#2E7DD1",
+  Other: "#8A8371",
+};
+
+const defaultGoals: SavingsGoal[] = [
   {
-    id: "tax-1",
-    income_source: "Delivery",
-    income_amount: 18000,
-    date: "2026-09-01",
-    category: "Gig Income",
-    platform: "Delivery Platform",
-    document_status: "available",
-    notes: "Monthly delivery income",
+    id: "goal-1",
+    name: "3-month emergency cushion",
+    category: "Emergency Fund",
+    targetAmount: 30000,
+    currentAmount: 12400,
+    targetDate: "2026-12-31",
+    autoSaveEnabled: true,
+    autoSaveAmount: 100,
+    autoSaveFrequency: "daily",
+    notes: "Builds from every delivery payout automatically.",
   },
   {
-    id: "tax-2",
-    income_source: "Freelance",
-    income_amount: 12000,
-    date: "2026-09-10",
-    category: "Freelance Income",
-    platform: "Freelance Platform",
-    document_status: "missing",
-    notes: "Statement needs to be collected",
+    id: "goal-2",
+    name: "New delivery bike",
+    category: "Vehicle & Equipment",
+    targetAmount: 45000,
+    currentAmount: 9000,
+    targetDate: "2027-03-01",
+    autoSaveEnabled: true,
+    autoSaveAmount: 250,
+    autoSaveFrequency: "weekly",
   },
 ];
 
-const defaultChecklist: TaxChecklist = {
-  incomeRecordsAvailable: true,
-  platformStatementsAvailable: false,
-  bankRecordsOrganized: false,
-  documentsCollected: false,
-  expenseRecordsOrganized: false,
-};
+const inputClass =
+  "w-full bg-white border border-[#D8E4DE] rounded-lg px-3.5 py-2.5 text-[#0F2E27] placeholder:text-[#8FA79D] focus:outline-none focus:border-[#2E8B7A] focus:ring-2 focus:ring-[#2E8B7A]/15 transition-all text-sm";
 
-export default function TaxPage() {
-  const [records, setRecords] = useState<TaxRecord[]>([]);
-  const [checklist, setChecklist] =
-    useState<TaxChecklist>(defaultChecklist);
+function daysLeft(targetDate: string) {
+  const diff = new Date(targetDate).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
+function GoalJar({ percent, color }: { percent: number; color: string }) {
+  const clamped = Math.min(100, Math.max(0, percent));
+  const fillY = 56 - (clamped / 100) * 56;
+  return (
+    <svg viewBox="0 0 48 64" className="w-12 h-16 shrink-0" aria-hidden="true">
+      <defs>
+        <clipPath id={`jar-${color.replace("#", "")}`}>
+          <path d="M6 8 h36 v46 a10 10 0 0 1 -10 10 h-16 a10 10 0 0 1 -10 -10 z" />
+        </clipPath>
+      </defs>
+      <path
+        d="M6 8 h36 v46 a10 10 0 0 1 -10 10 h-16 a10 10 0 0 1 -10 -10 z"
+        fill="#F1F7F4"
+        stroke="#D8E4DE"
+        strokeWidth="1.5"
+      />
+      <rect x="16" y="2" width="16" height="7" rx="2" fill="#D8E4DE" />
+      <g clipPath={`url(#jar-${color.replace("#", "")})`}>
+        <rect x="4" y={8 + fillY} width="40" height={56 - fillY} fill={color} opacity="0.85" />
+      </g>
+    </svg>
+  );
+}
+
+export default function SavingsGoalsPage() {
+  const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [showForm, setShowForm] = useState(false);
 
-  const [incomeSource, setIncomeSource] = useState("");
-  const [incomeAmount, setIncomeAmount] = useState("");
-  const [date, setDate] = useState("");
-  const [category, setCategory] = useState("Gig Income");
-  const [platform, setPlatform] = useState("");
-  const [documentStatus, setDocumentStatus] =
-    useState<TaxRecord["document_status"]>("available");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("Emergency Fund");
+  const [targetAmount, setTargetAmount] = useState("");
+  const [currentAmount, setCurrentAmount] = useState("");
+  const [targetDate, setTargetDate] = useState("");
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  const [autoSaveAmount, setAutoSaveAmount] = useState("");
+  const [autoSaveFrequency, setAutoSaveFrequency] = useState<SavingsGoal["autoSaveFrequency"]>("daily");
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
-    const storedRecords = localStorage.getItem("rupeemate_tax_records");
-    const storedChecklist = localStorage.getItem("rupeemate_tax_checklist");
-
-    if (storedRecords) {
-      setRecords(JSON.parse(storedRecords));
+    const stored = localStorage.getItem("rupeemate_savings_goals");
+    if (stored) {
+      setGoals(JSON.parse(stored));
     } else {
-      localStorage.setItem(
-        "rupeemate_tax_records",
-        JSON.stringify(defaultRecords)
-      );
-      setRecords(defaultRecords);
-    }
-
-    if (storedChecklist) {
-      setChecklist(JSON.parse(storedChecklist));
-    } else {
-      localStorage.setItem(
-        "rupeemate_tax_checklist",
-        JSON.stringify(defaultChecklist)
-      );
-      setChecklist(defaultChecklist);
+      localStorage.setItem("rupeemate_savings_goals", JSON.stringify(defaultGoals));
+      setGoals(defaultGoals);
     }
   }, []);
 
-  const saveRecords = (updated: TaxRecord[]) => {
-    setRecords(updated);
-    localStorage.setItem(
-      "rupeemate_tax_records",
-      JSON.stringify(updated)
-    );
+  const saveGoals = (updated: SavingsGoal[]) => {
+    setGoals(updated);
+    localStorage.setItem("rupeemate_savings_goals", JSON.stringify(updated));
   };
 
-  const saveChecklist = (updated: TaxChecklist) => {
-    setChecklist(updated);
-    localStorage.setItem(
-      "rupeemate_tax_checklist",
-      JSON.stringify(updated)
-    );
-  };
-
-  const addRecord = () => {
-    if (!incomeSource || !incomeAmount || !date) return;
-
-    const newRecord: TaxRecord = {
+  const addGoal = () => {
+    if (!name || !targetAmount || !targetDate) return;
+    const newGoal: SavingsGoal = {
       id: crypto.randomUUID(),
-      income_source: incomeSource,
-      income_amount: Number(incomeAmount),
-      date,
+      name,
       category,
-      platform: platform || undefined,
-      document_status: documentStatus,
+      targetAmount: Number(targetAmount),
+      currentAmount: Number(currentAmount || 0),
+      targetDate,
+      autoSaveEnabled,
+      autoSaveAmount: Number(autoSaveAmount || 0),
+      autoSaveFrequency,
       notes: notes || undefined,
     };
-
-    saveRecords([...records, newRecord]);
-
-    setIncomeSource("");
-    setIncomeAmount("");
-    setDate("");
-    setCategory("Gig Income");
-    setPlatform("");
-    setDocumentStatus("available");
+    saveGoals([...goals, newGoal]);
+    setName("");
+    setCategory("Emergency Fund");
+    setTargetAmount("");
+    setCurrentAmount("");
+    setTargetDate("");
+    setAutoSaveEnabled(true);
+    setAutoSaveAmount("");
+    setAutoSaveFrequency("daily");
     setNotes("");
     setShowForm(false);
   };
 
-  const deleteRecord = (id: string) => {
-    saveRecords(records.filter((record) => record.id !== id));
-  };
+  const deleteGoal = (id: string) => saveGoals(goals.filter((g) => g.id !== id));
 
-  const totalIncome = useMemo(
+  const totalSaved = useMemo(() => goals.reduce((t, g) => t + g.currentAmount, 0), [goals]);
+  const totalTarget = useMemo(() => goals.reduce((t, g) => t + g.targetAmount, 0), [goals]);
+  const activeAutoSaves = useMemo(() => goals.filter((g) => g.autoSaveEnabled), [goals]);
+  const dailyPace = useMemo(
     () =>
-      records.reduce(
-        (total, record) => total + Number(record.income_amount || 0),
+      activeAutoSaves.reduce(
+        (t, g) => t + (g.autoSaveFrequency === "daily" ? g.autoSaveAmount : g.autoSaveAmount / 7),
         0
       ),
-    [records]
+    [activeAutoSaves]
   );
 
-  const missingDocuments = useMemo(
-    () =>
-      records.filter(
-        (record) => record.document_status === "missing"
-      ).length,
-    [records]
-  );
-
-  const categories = useMemo(() => {
-    const result: Record<string, number> = {};
-
-    records.forEach((record) => {
-      result[record.category] =
-        (result[record.category] || 0) + record.income_amount;
-    });
-
-    return result;
-  }, [records]);
-
-  const checklistItems = [
-    {
-      key: "incomeRecordsAvailable" as const,
-      label: "Income records available",
-    },
-    {
-      key: "platformStatementsAvailable" as const,
-      label: "Platform statements available",
-    },
-    {
-      key: "bankRecordsOrganized" as const,
-      label: "Relevant bank records organized",
-    },
-    {
-      key: "documentsCollected" as const,
-      label: "Required documents collected",
-    },
-    {
-      key: "expenseRecordsOrganized" as const,
-      label: "Expense records organized",
-    },
-  ];
-
-  const completedChecklist = Object.values(checklist).filter(
-    Boolean
-  ).length;
-
-  const checklistProgress = Math.round(
-    (completedChecklist / checklistItems.length) * 100
-  );
-
-  const reminders: string[] = [];
-
-  if (missingDocuments > 0) {
-    reminders.push(
-      `${missingDocuments} income record(s) need document attention.`
-    );
-  }
-
-  if (records.length > 1) {
-    const uniqueSources = new Set(
-      records.map((record) => record.income_source)
-    );
-
-    if (uniqueSources.size > 1) {
-      reminders.push(
-        "You have income from multiple sources. Keep records organized."
-      );
-    }
-  }
-
-  if (!checklist.platformStatementsAvailable) {
-    reminders.push("Review platform statements before tax preparation.");
-  }
-
-  if (!checklist.bankRecordsOrganized) {
-    reminders.push("Review and organize relevant bank records.");
-  }
-
-  if (reminders.length === 0) {
-    reminders.push("No immediate tax-record reminder.");
-  }
+  const nearestGoal = useMemo(() => {
+    const unfinished = goals.filter((g) => g.currentAmount < g.targetAmount);
+    if (unfinished.length === 0) return null;
+    return [...unfinished].sort((a, b) => daysLeft(a.targetDate) - daysLeft(b.targetDate))[0];
+  }, [goals]);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white pt-24 px-6 pb-12">
+    <main className="min-h-screen bg-[#F5FAF7] text-[#0F2E27] pt-20 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold">Tax Center</h1>
-            <p className="text-slate-400 mt-2">
-              Organize income records and stay tax-ready.
+        {/* Hero */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-10">
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 bg-[#0F2E27] text-[#EAF5EF] px-3.5 py-1.5 rounded-full text-xs font-medium mb-4">
+              <PiggyBank size={13} />
+              Savings Goals
+            </div>
+            <h1 className="text-4xl md:text-5xl font-semibold leading-[1.1] text-[#0F2E27]">
+              Small drops from every payout, filling something real
+            </h1>
+            <p className="text-[#4D6B62] mt-4 text-[15px] leading-relaxed">
+              Set a goal, let a slice of every gig payment flow toward it automatically,
+              and watch the jar rise without touching a single transaction yourself.
             </p>
           </div>
-
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 px-5 py-3 rounded-xl font-semibold"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#0F2E27] text-white font-medium rounded-full shadow-sm hover:bg-[#173E33] transition-colors self-start lg:self-center"
           >
-            <Plus size={20} />
-            Add Income Record
+            <Plus size={18} />
+            New goal
           </button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid md:grid-cols-3 gap-5 mb-8">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <TrendingUp className="text-emerald-400" />
-              <span className="text-slate-400">Recorded Income</span>
+        {/* Momentum strip */}
+        <div className="grid sm:grid-cols-3 gap-4 mb-10">
+          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-6">
+            <div className="flex items-center gap-2 text-[#4D6B62] text-sm font-medium mb-3">
+              <TrendingUp size={16} className="text-[#2E8B7A]" />
+              Total saved
             </div>
-
-            <p className="text-3xl font-bold">
-              ₹{totalIncome.toLocaleString()}
+            <p className="text-3xl font-semibold tabular-nums text-[#0F2E27]">
+              ₹{totalSaved.toLocaleString("en-IN")}
             </p>
-
-            <p className="text-sm text-slate-500 mt-2">
-              Across {records.length} record(s)
+            <p className="text-sm text-[#8FA79D] mt-1">
+              of ₹{totalTarget.toLocaleString("en-IN")} across {goals.length} goal(s)
             </p>
           </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <FileText className="text-blue-400" />
-              <span className="text-slate-400">
-                Records Needing Attention
-              </span>
+          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-6">
+            <div className="flex items-center gap-2 text-[#4D6B62] text-sm font-medium mb-3">
+              <Zap size={16} className="text-[#E8871E]" />
+              Auto-save pace
             </div>
-
-            <p className="text-3xl font-bold">
-              {missingDocuments}
+            <p className="text-3xl font-semibold tabular-nums text-[#0F2E27]">
+              ₹{Math.round(dailyPace).toLocaleString("en-IN")}
+              <span className="text-base font-normal text-[#8FA79D]">/day</span>
             </p>
-
-            <p className="text-sm text-slate-500 mt-2">
-              Missing document records
-            </p>
+            <p className="text-sm text-[#8FA79D] mt-1">{activeAutoSaves.length} goal(s) on autopilot</p>
           </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <CheckCircle2 className="text-emerald-400" />
-              <span className="text-slate-400">
-                Readiness Checklist
-              </span>
+          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-6">
+            <div className="flex items-center gap-2 text-[#4D6B62] text-sm font-medium mb-3">
+              <Target size={16} className="text-[#7A5FD9]" />
+              Closest finish line
             </div>
-
-            <p className="text-3xl font-bold">
-              {checklistProgress}%
-            </p>
-
-            <div className="h-2 bg-slate-800 rounded-full mt-3 overflow-hidden">
-              <div
-                className="h-full bg-emerald-500"
-                style={{ width: `${checklistProgress}%` }}
-              />
-            </div>
+            {nearestGoal ? (
+              <>
+                <p className="text-lg font-semibold text-[#0F2E27] truncate">{nearestGoal.name}</p>
+                <p className="text-sm text-[#8FA79D] mt-1">{daysLeft(nearestGoal.targetDate)} days to target date</p>
+              </>
+            ) : (
+              <p className="text-sm text-[#8FA79D]">No goals in progress yet.</p>
+            )}
           </div>
         </div>
 
-        {/* Add Record Form */}
         {showForm && (
-          <div className="mb-8 p-6 rounded-2xl bg-slate-900 border border-slate-700">
-            <h2 className="text-xl font-bold mb-5">
-              Add Income Record
-            </h2>
-
+          <div className="mb-10 p-8 rounded-2xl bg-white border border-[#E1EEE8] shadow-sm">
+            <h2 className="text-2xl font-semibold text-[#0F2E27] mb-6">Set a new goal</h2>
             <div className="grid md:grid-cols-2 gap-4">
-              <input
-                value={incomeSource}
-                onChange={(e) => setIncomeSource(e.target.value)}
-                placeholder="Income source e.g. Delivery"
-                className="bg-slate-800 border border-slate-700 rounded-lg p-3"
-              />
-
-              <input
-                type="number"
-                value={incomeAmount}
-                onChange={(e) => setIncomeAmount(e.target.value)}
-                placeholder="Income amount"
-                className="bg-slate-800 border border-slate-700 rounded-lg p-3"
-              />
-
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg p-3"
-              />
-
-              <input
-                value={platform}
-                onChange={(e) => setPlatform(e.target.value)}
-                placeholder="Platform e.g. Swiggy / Uber / Freelance"
-                className="bg-slate-800 border border-slate-700 rounded-lg p-3"
-              />
-
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg p-3"
-              >
-                <option>Gig Income</option>
-                <option>Freelance Income</option>
-                <option>Driving Income</option>
-                <option>Delivery Income</option>
-                <option>Other Income</option>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Goal name, e.g. New bike" className={inputClass} />
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass}>
+                {Object.keys(categoryColor).map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
               </select>
-
-              <select
-                value={documentStatus}
-                onChange={(e) =>
-                  setDocumentStatus(
-                    e.target.value as TaxRecord["document_status"]
-                  )
-                }
-                className="bg-slate-800 border border-slate-700 rounded-lg p-3"
-              >
-                <option value="available">Document Available</option>
-                <option value="missing">Document Missing</option>
-                <option value="not_applicable">
-                  Not Applicable
-                </option>
-              </select>
-
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notes"
-                className="md:col-span-2 bg-slate-800 border border-slate-700 rounded-lg p-3 min-h-24"
-              />
+              <input type="number" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} placeholder="Target amount" className={inputClass} />
+              <input type="number" value={currentAmount} onChange={(e) => setCurrentAmount(e.target.value)} placeholder="Already saved (optional)" className={inputClass} />
+              <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className={inputClass} />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={autoSaveAmount}
+                  onChange={(e) => setAutoSaveAmount(e.target.value)}
+                  placeholder="Auto-save amount"
+                  className={inputClass}
+                />
+                <select
+                  value={autoSaveFrequency}
+                  onChange={(e) => setAutoSaveFrequency(e.target.value as SavingsGoal["autoSaveFrequency"])}
+                  className={`${inputClass} w-28 shrink-0`}
+                >
+                  <option value="daily">/ day</option>
+                  <option value="weekly">/ week</option>
+                </select>
+              </div>
+              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" className={`${inputClass} md:col-span-2 min-h-20`} />
+              <label className="flex items-center gap-2.5 md:col-span-2 cursor-pointer">
+                <input type="checkbox" checked={autoSaveEnabled} onChange={(e) => setAutoSaveEnabled(e.target.checked)} className="w-4 h-4 accent-[#2E8B7A]" />
+                <span className="text-sm text-[#4D6B62]">Auto-save toward this goal from incoming payouts</span>
+              </label>
             </div>
-
-            <button
-              onClick={addRecord}
-              className="mt-5 bg-emerald-500 hover:bg-emerald-400 px-6 py-3 rounded-lg font-semibold"
-            >
-              Save Income Record
+            <button onClick={addGoal} className="mt-6 px-8 py-3 bg-[#0F2E27] text-white font-medium rounded-full hover:bg-[#173E33] transition-colors">
+              Create goal
             </button>
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Income Records */}
-          <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <h2 className="text-xl font-bold mb-5">
-              Income Records
-            </h2>
-
-            {records.length === 0 ? (
-              <p className="text-slate-400">
-                No income records added yet.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {records.map((record) => (
-                  <div
-                    key={record.id}
-                    className="border border-slate-800 rounded-xl p-4"
-                  >
-                    <div className="flex justify-between gap-4">
-                      <div>
-                        <h3 className="font-semibold">
-                          {record.income_source}
-                        </h3>
-
-                        <p className="text-sm text-slate-400 mt-1">
-                          {record.category}
-                          {record.platform
-                            ? ` · ${record.platform}`
-                            : ""}
+        {/* Goal jars */}
+        {goals.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-12 text-center">
+            <Sparkles className="mx-auto text-[#8FA79D] mb-3" size={28} />
+            <p className="text-[#4D6B62]">No goals yet. Create one to start auto-saving.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-5">
+            {goals.map((goal) => {
+              const percent = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
+              const color = categoryColor[goal.category] || categoryColor.Other;
+              const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+              return (
+                <div key={goal.id} className="bg-white rounded-2xl border border-[#E1EEE8] p-6 flex gap-5">
+                  <GoalJar percent={percent} color={color} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium mb-1" style={{ color }}>
+                          {goal.category}
                         </p>
-
-                        <p className="text-xs text-slate-500 mt-2">
-                          {record.date}
-                        </p>
+                        <h3 className="font-semibold text-[#0F2E27] text-lg truncate">{goal.name}</h3>
                       </div>
+                      <button onClick={() => deleteGoal(goal.id)} className="text-[#B7C9C2] hover:text-[#D9536F] transition-colors shrink-0">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
 
-                      <div className="text-right">
-                        <p className="font-bold text-lg">
-                          ₹{record.income_amount.toLocaleString()}
-                        </p>
+                    <div className="flex items-baseline gap-2 mt-3">
+                      <span className="text-xl font-semibold tabular-nums text-[#0F2E27]">
+                        ₹{goal.currentAmount.toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-sm text-[#8FA79D]">of ₹{goal.targetAmount.toLocaleString("en-IN")}</span>
+                    </div>
 
-                        <span
-                          className={`inline-block text-xs px-2 py-1 rounded-full mt-2 ${
-                            record.document_status === "available"
-                              ? "bg-emerald-500/15 text-emerald-400"
-                              : record.document_status === "missing"
-                              ? "bg-red-500/15 text-red-400"
-                              : "bg-slate-700 text-slate-300"
-                          }`}
-                        >
-                          {record.document_status === "available"
-                            ? "Document Available"
-                            : record.document_status === "missing"
-                            ? "Document Missing"
-                            : "Not Applicable"}
+                    <div className="h-2 bg-[#EAF5EF] rounded-full mt-2 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, percent)}%`, backgroundColor: color }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between mt-3 text-xs text-[#8FA79D]">
+                      <span>₹{remaining.toLocaleString("en-IN")} to go · {daysLeft(goal.targetDate)}d left</span>
+                      {goal.autoSaveEnabled ? (
+                        <span className="inline-flex items-center gap-1 text-[#2E8B7A] font-medium">
+                          <Zap size={11} />₹{goal.autoSaveAmount}/{goal.autoSaveFrequency === "daily" ? "day" : "wk"}
                         </span>
-                      </div>
+                      ) : (
+                        <span>Manual saving</span>
+                      )}
                     </div>
 
-                    {record.notes && (
-                      <p className="text-sm text-slate-400 mt-3">
-                        {record.notes}
-                      </p>
-                    )}
-
-                    <button
-                      onClick={() => deleteRecord(record.id)}
-                      className="mt-3 text-red-400 hover:text-red-300 text-sm flex items-center gap-1"
-                    >
-                      <Trash2 size={15} />
-                      Delete
-                    </button>
+                    {goal.notes && <p className="text-sm text-[#4D6B62] mt-3">{goal.notes}</p>}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              );
+            })}
           </div>
+        )}
 
-          {/* Tax Readiness */}
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold mb-5">
-                Tax Readiness
-              </h2>
-
-              <div className="space-y-3">
-                {checklistItems.map((item) => (
-                  <label
-                    key={item.key}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checklist[item.key]}
-                      onChange={(e) =>
-                        saveChecklist({
-                          ...checklist,
-                          [item.key]: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4 accent-emerald-500"
-                    />
-
-                    <span className="text-sm text-slate-300">
-                      {item.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Reminders */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="text-amber-400" />
-                <h2 className="text-xl font-bold">
-                  Tax Reminders
-                </h2>
-              </div>
-
-              <div className="space-y-3">
-                {reminders.map((reminder, index) => (
-                  <div
-                    key={index}
-                    className="text-sm text-slate-300 bg-slate-800/60 rounded-lg p-3"
-                  >
-                    {reminder}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Income Categories */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold mb-4">
-                Income Categories
-              </h2>
-
-              <div className="space-y-3">
-                {Object.entries(categories).map(
-                  ([categoryName, amount]) => (
-                    <div
-                      key={categoryName}
-                      className="flex justify-between text-sm"
-                    >
-                      <span className="text-slate-400">
-                        {categoryName}
-                      </span>
-
-                      <span className="font-semibold">
-                        ₹{amount.toLocaleString()}
-                      </span>
-                    </div>
-                  )
-                )}
-
-                {Object.keys(categories).length === 0 && (
-                  <p className="text-sm text-slate-500">
-                    No category data yet.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Disclaimer */}
-        <div className="mt-8 p-4 rounded-xl bg-slate-900 border border-slate-800">
-          <p className="text-xs text-slate-500">
-            RupeeMate Tax Center is a tax-readiness and record-organization
-            assistant. It does not calculate or determine official tax
-            liability and does not replace professional tax advice.
+        <div className="mt-10 p-4 rounded-xl bg-white border border-[#E1EEE8]">
+          <p className="text-xs text-[#8FA79D] leading-relaxed">
+            RupeeMate Savings Goals helps you set targets and automate small, regular transfers from
+            your income. It does not guarantee returns and does not replace professional financial advice.
           </p>
         </div>
       </div>
