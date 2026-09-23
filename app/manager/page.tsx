@@ -21,6 +21,24 @@ import { supabase } from '@/lib/supabase';
 // helper becomes unnecessary — you can go back to plain `supabase.from('transactions')`.
 const txTable = () => (supabase as any).from('transactions');
 
+// ── JWT-expiry handling ──
+// True when a Supabase/PostgREST error looks like an expired / invalid access token.
+const isJwtError = (err: any) => {
+  const text = `${err?.message ?? ''} ${err?.code ?? ''}`.toLowerCase();
+  return err?.status === 401 || text.includes('jwt') || text.includes('pgrst301');
+};
+
+// Runs a Supabase request; if it fails because the token expired, refreshes the
+// session once and retries. Works for select / insert / update / delete.
+async function runWithRefresh<T extends { error: any }>(fn: () => PromiseLike<T>): Promise<T> {
+  let res = await fn();
+  if (res.error && isJwtError(res.error)) {
+    const { error: refreshError } = await supabase.auth.refreshSession();
+    if (!refreshError) res = await fn();
+  }
+  return res;
+}
+
 interface Transaction {
   id: string;
   type: 'income' | 'expense' | 'borrow' | 'lend';
@@ -45,7 +63,14 @@ const SAND = '#8A6D3B';
 const EXPENSE_COLORS = [ROSE, AMBER, '#7C5CBF', INDIGO, '#3F8C7A', '#9A6B4F'];
 const ALLOCATION_COLORS = [TEAL, INDIGO, AMBER, SAND];
 
-const today = () => new Date().toISOString().split('T')[0];
+// Local date (YYYY-MM-DD). toISOString() returns the UTC date, which is "yesterday"
+// in India between 00:00 and 05:30 IST and would block today's date in the picker.
+const today = () => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
 const tempId = () => `tmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
 const ALLOCATIONS: Record<RiskProfile, { name: string; value: number }[]> = {
@@ -94,6 +119,10 @@ const DEMO_TRANSACTIONS: Transaction[] = [
 const currencyFormatter = (value: any): string => `₹${Number(value ?? 0).toLocaleString()}`;
 const percentFormatter = (value: any): string => `${value ?? 0}%`;
 
+// Wraps a CSV cell in quotes when it contains commas, quotes or newlines.
+const csvCell = (value: string) =>
+  /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+
 export default function FinanceDashboard() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -127,66 +156,64 @@ export default function FinanceDashboard() {
   };
   const quickAmounts = [500, 1000, 2000, 5000, 10000];
 
-  // ── Load session + transactions from Supabase, fall back to demo data ──
+  // ── Load transactions from Supabase (retries once if the JWT expired), fall back to demo data ──
   const loadTransactions = useCallback(async (uid: string) => {
-    const { data, error } = await txTable()
-      .select('*')
-      .eq('user_id', uid)
-      .order('date', { ascending: false });
+    const { data, error } = await runWithRefresh(() =>
+      txTable().select('*').eq('user_id', uid).order('date', { ascending: false })
+    );
+
+    // Still a JWT error after refreshing -> the session is dead. Clear it and ask to sign in again.
+    if (error && isJwtError(error)) {
+      await supabase.auth.signOut({ scope: 'local' });
+      setUserId(null);
+      setSyncError('Your session expired. Please sign in again to load your saved transactions.');
+      setTransactions(DEMO_TRANSACTIONS);
+      setIsDemoMode(true);
+      return;
+    }
 
     if (error) {
       setSyncError(`Could not load your saved transactions (${error.message}). Showing demo data instead.`);
       setTransactions(DEMO_TRANSACTIONS);
       setIsDemoMode(true);
-    } else if (!data || data.length === 0) {
-      setTransactions([]);
-      setIsDemoMode(false);
     } else {
-      setTransactions(data as Transaction[]);
+      setSyncError(''); // clears any stale error from an earlier failed attempt
+      setTransactions((data ?? []) as Transaction[]);
       setIsDemoMode(false);
     }
   }, []);
 
+  // ── Auth: onAuthStateChange is the single source of truth ──
   useEffect(() => {
     setMounted(true);
-    let unsub: { unsubscribe: () => void } | undefined;
+    let cancelled = false;
 
-    (async () => {
-      setLoadingData(true);
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setUserId(user.id);
-          await loadTransactions(user.id);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // IMPORTANT: don't `await` other supabase calls directly inside this callback
+      // (can deadlock on the auth lock). Defer to the next tick instead.
+      setTimeout(async () => {
+        if (cancelled) return;
+
+        if (session?.user) {
+          setUserId(session.user.id);
+          // Full-page spinner only on first load / fresh sign-in, not on silent token refreshes.
+          if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') setLoadingData(true);
+          await loadTransactions(session.user.id);
+          if (!cancelled) setLoadingData(false);
         } else {
+          // INITIAL_SESSION with no session, or SIGNED_OUT
           setUserId(null);
           setIsDemoMode(true);
           setTransactions(DEMO_TRANSACTIONS);
+          setLoadingData(false);
         }
-      } catch (e: any) {
-        setSyncError('Could not reach Supabase — working in demo mode.');
-        setIsDemoMode(true);
-        setTransactions(DEMO_TRANSACTIONS);
-      } finally {
-        setLoadingData(false);
-      }
-    })();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event: string, session: any) => {
-      if (session?.user) {
-        setUserId(session.user.id);
-        setLoadingData(true);
-        await loadTransactions(session.user.id);
-        setLoadingData(false);
-      } else {
-        setUserId(null);
-        setIsDemoMode(true);
-        setTransactions(DEMO_TRANSACTIONS);
-      }
+      }, 0);
     });
-    unsub = listener?.subscription;
 
-    return () => unsub?.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, [loadTransactions]);
 
   // ── Core totals ──
@@ -280,14 +307,15 @@ export default function FinanceDashboard() {
       return;
     }
     if (id) {
-      const { error } = await txTable().update(payload).eq('id', id).eq('user_id', userId);
+      const { error } = await runWithRefresh(() =>
+        txTable().update(payload).eq('id', id).eq('user_id', userId)
+      );
       if (error) throw error;
       setTransactions(prev => prev.map(t => t.id === id ? { ...payload, id } : t));
     } else {
-      const { data, error } = await txTable()
-        .insert([{ ...payload, user_id: userId }])
-        .select()
-        .single();
+      const { data, error } = await runWithRefresh(() =>
+        txTable().insert([{ ...payload, user_id: userId }]).select().single()
+      );
       if (error) throw error;
       setTransactions(prev => [data as Transaction, ...prev]);
     }
@@ -331,7 +359,9 @@ export default function FinanceDashboard() {
       setTransactions(prev => prev.filter(t => t.id !== id));
       return;
     }
-    const { error } = await txTable().delete().eq('id', id).eq('user_id', userId);
+    const { error } = await runWithRefresh(() =>
+      txTable().delete().eq('id', id).eq('user_id', userId)
+    );
     if (error) {
       setSyncError(`Couldn't delete that transaction (${error.message}).`);
     } else {
@@ -364,13 +394,14 @@ export default function FinanceDashboard() {
     const csv = [
       ['Date', 'Type', 'Category', 'Amount', 'Payment Mode', 'Source', 'Description'],
       ...transactions.map(t => [t.date, t.type, t.category, t.amount.toString(), t.payment_mode ?? '', t.source ?? '', t.description])
-    ].map(row => row.join(',')).join('\n');
+    ].map(row => row.map(csvCell).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'rupeemate-transactions.csv';
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   if (!mounted) return null;
