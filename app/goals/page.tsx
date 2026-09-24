@@ -11,8 +11,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-// If you keep a shared types file, move this into it (e.g. "@/types/financial").
-// Left local here so this file drops in standalone.
 export type SavingsGoal = {
   id: string;
   name: string;
@@ -26,12 +24,13 @@ export type SavingsGoal = {
   notes?: string;
 };
 
+// Muted, ledger-friendly palette
 const categoryColor: Record<string, string> = {
-  "Emergency Fund": "#E8871E",
-  "Vehicle & Equipment": "#2E8B7A",
-  "Rent Buffer": "#7A5FD9",
-  "Health & Insurance": "#D9536F",
-  "Skill & Tools": "#2E7DD1",
+  "Emergency Fund": "#B8860B",
+  "Vehicle & Equipment": "#1B2B44",
+  "Rent Buffer": "#3F6B4D",
+  "Health & Insurance": "#A6432D",
+  "Skill & Tools": "#5B5540",
   Other: "#8A8371",
 };
 
@@ -62,31 +61,42 @@ const defaultGoals: SavingsGoal[] = [
 ];
 
 const inputClass =
-  "w-full bg-white border border-[#D8E4DE] rounded-lg px-3.5 py-2.5 text-[#0F2E27] placeholder:text-[#8FA79D] focus:outline-none focus:border-[#2E8B7A] focus:ring-2 focus:ring-[#2E8B7A]/15 transition-all text-sm";
+  "w-full bg-[#FCFAF4] border border-[#D9D0B8] rounded-md px-3.5 py-2.5 text-[#1B2B44] placeholder:text-[#9A927B] focus:outline-none focus:border-[#B8860B] focus:ring-1 focus:ring-[#B8860B]/40 transition-colors font-sans text-sm";
+
+
+// Applies the Tax Center cream background to the whole page (body), so no white shows around/behind content
+function useLedgerBackground() {
+  useEffect(() => {
+    const prev = document.body.style.backgroundColor;
+    document.body.style.backgroundColor = "#F7F3E9";
+    return () => { document.body.style.backgroundColor = prev; };
+  }, []);
+}
 
 function daysLeft(targetDate: string) {
   const diff = new Date(targetDate).getTime() - Date.now();
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
-function GoalJar({ percent, color }: { percent: number; color: string }) {
+function GoalJar({ percent, color, id }: { percent: number; color: string; id: string }) {
   const clamped = Math.min(100, Math.max(0, percent));
   const fillY = 56 - (clamped / 100) * 56;
+  const clipId = `jar-${id}`;
   return (
     <svg viewBox="0 0 48 64" className="w-12 h-16 shrink-0" aria-hidden="true">
       <defs>
-        <clipPath id={`jar-${color.replace("#", "")}`}>
+        <clipPath id={clipId}>
           <path d="M6 8 h36 v46 a10 10 0 0 1 -10 10 h-16 a10 10 0 0 1 -10 -10 z" />
         </clipPath>
       </defs>
       <path
         d="M6 8 h36 v46 a10 10 0 0 1 -10 10 h-16 a10 10 0 0 1 -10 -10 z"
-        fill="#F1F7F4"
-        stroke="#D8E4DE"
+        fill="#EFE9D8"
+        stroke="#D9D0B8"
         strokeWidth="1.5"
       />
-      <rect x="16" y="2" width="16" height="7" rx="2" fill="#D8E4DE" />
-      <g clipPath={`url(#jar-${color.replace("#", "")})`}>
+      <rect x="16" y="2" width="16" height="7" rx="2" fill="#D9D0B8" />
+      <g clipPath={`url(#${clipId})`}>
         <rect x="4" y={8 + fillY} width="40" height={56 - fillY} fill={color} opacity="0.85" />
       </g>
     </svg>
@@ -94,6 +104,7 @@ function GoalJar({ percent, color }: { percent: number; color: string }) {
 }
 
 export default function SavingsGoalsPage() {
+  useLedgerBackground();
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [showForm, setShowForm] = useState(false);
 
@@ -170,76 +181,80 @@ export default function SavingsGoalsPage() {
   }, [goals]);
 
   return (
-    <main className="min-h-screen bg-[#F5FAF7] text-[#0F2E27] pt-20 pb-20 px-6">
+    <main className="min-h-screen bg-[#F7F3E9] text-[#1B2B44] pt-20 pb-20 px-6 font-sans" style={{ backgroundColor: "#F7F3E9" }}>
       <div className="max-w-6xl mx-auto">
-        {/* Hero */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-10">
-          <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 bg-[#0F2E27] text-[#EAF5EF] px-3.5 py-1.5 rounded-full text-xs font-medium mb-4">
-              <PiggyBank size={13} />
-              Savings Goals
-            </div>
-            <h1 className="text-4xl md:text-5xl font-semibold leading-[1.1] text-[#0F2E27]">
-              Small drops from every payout, filling something real
-            </h1>
-            <p className="text-[#4D6B62] mt-4 text-[15px] leading-relaxed">
-              Set a goal, let a slice of every gig payment flow toward it automatically,
-              and watch the jar rise without touching a single transaction yourself.
-            </p>
+        {/* Folder-tab header */}
+        <div className="mb-10">
+          <div className="inline-flex items-center gap-2 bg-[#1B2B44] text-[#F7F3E9] px-4 py-1.5 rounded-t-md text-xs tracking-wide font-medium">
+            <PiggyBank size={14} />
+            Savings Goals
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#0F2E27] text-white font-medium rounded-full shadow-sm hover:bg-[#173E33] transition-colors self-start lg:self-center"
-          >
-            <Plus size={18} />
-            New goal
-          </button>
+          <div className="border border-[#D9D0B8] bg-[#FCFAF4] rounded-b-md rounded-tr-md px-8 py-8 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div>
+                <h1 className="font-serif text-4xl md:text-5xl text-[#1B2B44] leading-tight">
+                  Small drops from every payout, filling something real
+                </h1>
+                <p className="text-[#5B5540] mt-3 max-w-lg text-[15px] leading-relaxed">
+                  Set a goal, let a slice of every gig payment flow toward it automatically,
+                  and watch the jar rise without touching a single transaction yourself.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-[#1B2B44] text-[#F7F3E9] font-medium rounded-md hover:bg-[#243A5E] transition-colors whitespace-nowrap"
+              >
+                <Plus size={17} />
+                New goal
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Momentum strip */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-10">
-          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-6">
-            <div className="flex items-center gap-2 text-[#4D6B62] text-sm font-medium mb-3">
-              <TrendingUp size={16} className="text-[#2E8B7A]" />
-              Total saved
+        {/* Ledger summary strip */}
+        <div className="grid sm:grid-cols-3 border border-[#D9D0B8] rounded-md bg-[#FCFAF4] mb-10 divide-y sm:divide-y-0 sm:divide-x divide-[#D9D0B8]">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wide text-[#8A8371]">Total saved</p>
+              <TrendingUp size={14} className="text-[#B8860B]" />
             </div>
-            <p className="text-3xl font-semibold tabular-nums text-[#0F2E27]">
+            <p className="font-serif text-3xl text-[#1B2B44] tabular-nums">
               ₹{totalSaved.toLocaleString("en-IN")}
             </p>
-            <p className="text-sm text-[#8FA79D] mt-1">
+            <p className="text-sm text-[#8A8371] mt-1">
               of ₹{totalTarget.toLocaleString("en-IN")} across {goals.length} goal(s)
             </p>
           </div>
-          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-6">
-            <div className="flex items-center gap-2 text-[#4D6B62] text-sm font-medium mb-3">
-              <Zap size={16} className="text-[#E8871E]" />
-              Auto-save pace
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wide text-[#8A8371]">Auto-save pace</p>
+              <Zap size={14} className="text-[#B8860B]" />
             </div>
-            <p className="text-3xl font-semibold tabular-nums text-[#0F2E27]">
+            <p className="font-serif text-3xl text-[#1B2B44] tabular-nums">
               ₹{Math.round(dailyPace).toLocaleString("en-IN")}
-              <span className="text-base font-normal text-[#8FA79D]">/day</span>
+              <span className="text-base text-[#8A8371] font-sans">/day</span>
             </p>
-            <p className="text-sm text-[#8FA79D] mt-1">{activeAutoSaves.length} goal(s) on autopilot</p>
+            <p className="text-sm text-[#8A8371] mt-1">{activeAutoSaves.length} goal(s) on autopilot</p>
           </div>
-          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-6">
-            <div className="flex items-center gap-2 text-[#4D6B62] text-sm font-medium mb-3">
-              <Target size={16} className="text-[#7A5FD9]" />
-              Closest finish line
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wide text-[#8A8371]">Closest finish line</p>
+              <Target size={14} className="text-[#B8860B]" />
             </div>
             {nearestGoal ? (
               <>
-                <p className="text-lg font-semibold text-[#0F2E27] truncate">{nearestGoal.name}</p>
-                <p className="text-sm text-[#8FA79D] mt-1">{daysLeft(nearestGoal.targetDate)} days to target date</p>
+                <p className="font-serif text-xl text-[#1B2B44] truncate">{nearestGoal.name}</p>
+                <p className="text-sm text-[#8A8371] mt-1">{daysLeft(nearestGoal.targetDate)} days to target date</p>
               </>
             ) : (
-              <p className="text-sm text-[#8FA79D]">No goals in progress yet.</p>
+              <p className="text-sm text-[#8A8371]">No goals in progress yet.</p>
             )}
           </div>
         </div>
 
         {showForm && (
-          <div className="mb-10 p-8 rounded-2xl bg-white border border-[#E1EEE8] shadow-sm">
-            <h2 className="text-2xl font-semibold text-[#0F2E27] mb-6">Set a new goal</h2>
+          <div className="mb-10 border border-[#D9D0B8] rounded-md bg-[#FCFAF4] p-8">
+            <h2 className="font-serif text-2xl text-[#1B2B44] mb-6">Set a new goal</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Goal name, e.g. New bike" className={inputClass} />
               <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass}>
@@ -269,11 +284,11 @@ export default function SavingsGoalsPage() {
               </div>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" className={`${inputClass} md:col-span-2 min-h-20`} />
               <label className="flex items-center gap-2.5 md:col-span-2 cursor-pointer">
-                <input type="checkbox" checked={autoSaveEnabled} onChange={(e) => setAutoSaveEnabled(e.target.checked)} className="w-4 h-4 accent-[#2E8B7A]" />
-                <span className="text-sm text-[#4D6B62]">Auto-save toward this goal from incoming payouts</span>
+                <input type="checkbox" checked={autoSaveEnabled} onChange={(e) => setAutoSaveEnabled(e.target.checked)} className="w-4 h-4 accent-[#B8860B]" />
+                <span className="text-sm text-[#5B5540]">Auto-save toward this goal from incoming payouts</span>
               </label>
             </div>
-            <button onClick={addGoal} className="mt-6 px-8 py-3 bg-[#0F2E27] text-white font-medium rounded-full hover:bg-[#173E33] transition-colors">
+            <button onClick={addGoal} className="mt-6 px-6 py-2.5 bg-[#1B2B44] text-[#F7F3E9] rounded-md font-medium hover:bg-[#243A5E] transition-colors">
               Create goal
             </button>
           </div>
@@ -281,50 +296,54 @@ export default function SavingsGoalsPage() {
 
         {/* Goal jars */}
         {goals.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#E1EEE8] p-12 text-center">
-            <Sparkles className="mx-auto text-[#8FA79D] mb-3" size={28} />
-            <p className="text-[#4D6B62]">No goals yet. Create one to start auto-saving.</p>
+          <div className="border border-[#D9D0B8] rounded-md bg-[#FCFAF4] p-12 text-center">
+            <Sparkles className="mx-auto text-[#B8860B] mb-3" size={28} />
+            <p className="text-[#8A8371] text-sm">No goals yet. Create one to start auto-saving.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid md:grid-cols-2 gap-6">
             {goals.map((goal) => {
               const percent = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
               const color = categoryColor[goal.category] || categoryColor.Other;
               const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
               return (
-                <div key={goal.id} className="bg-white rounded-2xl border border-[#E1EEE8] p-6 flex gap-5">
-                  <GoalJar percent={percent} color={color} />
+                <div key={goal.id} className="border border-[#D9D0B8] rounded-md bg-[#FCFAF4] p-6 flex gap-5 group">
+                  <GoalJar percent={percent} color={color} id={goal.id} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-xs font-medium mb-1" style={{ color }}>
+                        <p className="text-xs uppercase tracking-wide font-medium mb-1" style={{ color }}>
                           {goal.category}
                         </p>
-                        <h3 className="font-semibold text-[#0F2E27] text-lg truncate">{goal.name}</h3>
+                        <h3 className="font-serif text-xl text-[#1B2B44] truncate">{goal.name}</h3>
                       </div>
-                      <button onClick={() => deleteGoal(goal.id)} className="text-[#B7C9C2] hover:text-[#D9536F] transition-colors shrink-0">
-                        <Trash2 size={16} />
+                      <button
+                        onClick={() => deleteGoal(goal.id)}
+                        aria-label="Remove goal"
+                        className="text-[#A6432D] hover:text-[#7E3120] opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                      >
+                        <Trash2 size={15} />
                       </button>
                     </div>
 
                     <div className="flex items-baseline gap-2 mt-3">
-                      <span className="text-xl font-semibold tabular-nums text-[#0F2E27]">
+                      <span className="font-serif text-2xl tabular-nums text-[#1B2B44]">
                         ₹{goal.currentAmount.toLocaleString("en-IN")}
                       </span>
-                      <span className="text-sm text-[#8FA79D]">of ₹{goal.targetAmount.toLocaleString("en-IN")}</span>
+                      <span className="text-sm text-[#8A8371]">of ₹{goal.targetAmount.toLocaleString("en-IN")}</span>
                     </div>
 
-                    <div className="h-2 bg-[#EAF5EF] rounded-full mt-2 overflow-hidden">
+                    <div className="h-1.5 bg-[#EFE9D8] rounded-full mt-2 overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, percent)}%`, backgroundColor: color }}
                       />
                     </div>
 
-                    <div className="flex items-center justify-between mt-3 text-xs text-[#8FA79D]">
+                    <div className="flex items-center justify-between mt-3 text-xs text-[#8A8371]">
                       <span>₹{remaining.toLocaleString("en-IN")} to go · {daysLeft(goal.targetDate)}d left</span>
                       {goal.autoSaveEnabled ? (
-                        <span className="inline-flex items-center gap-1 text-[#2E8B7A] font-medium">
+                        <span className="inline-flex items-center gap-1 text-[#3F6B4D] font-medium">
                           <Zap size={11} />₹{goal.autoSaveAmount}/{goal.autoSaveFrequency === "daily" ? "day" : "wk"}
                         </span>
                       ) : (
@@ -332,7 +351,9 @@ export default function SavingsGoalsPage() {
                       )}
                     </div>
 
-                    {goal.notes && <p className="text-sm text-[#4D6B62] mt-3">{goal.notes}</p>}
+                    {goal.notes && (
+                      <p className="text-sm text-[#5B5540] mt-3 border-l-2 border-[#B8860B] pl-3">{goal.notes}</p>
+                    )}
                   </div>
                 </div>
               );
@@ -340,8 +361,8 @@ export default function SavingsGoalsPage() {
           </div>
         )}
 
-        <div className="mt-10 p-4 rounded-xl bg-white border border-[#E1EEE8]">
-          <p className="text-xs text-[#8FA79D] leading-relaxed">
+        <div className="mt-10 border border-[#D9D0B8] rounded-md bg-[#FCFAF4] px-5 py-4">
+          <p className="text-xs text-[#8A8371] leading-relaxed">
             RupeeMate Savings Goals helps you set targets and automate small, regular transfers from
             your income. It does not guarantee returns and does not replace professional financial advice.
           </p>
