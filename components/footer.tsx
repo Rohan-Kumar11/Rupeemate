@@ -13,6 +13,13 @@ interface FooterSection {
   links: FooterLink[];
 }
 
+// ── Ledger palette (matches Tax Center / Manager) ──
+const INK = "#1B2B44";
+const INK_DEEP = "#152238";
+const PAPER = "#FCFAF4";
+const LINE = "#D9D0B8";
+const AMBER = "#B8860B";
+
 const FOOTER_SECTIONS: FooterSection[] = [
   {
     title: "Product",
@@ -44,18 +51,18 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
+    <footer className="pt-16 pb-8" style={{ backgroundColor: INK_DEEP, color: LINE }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
-                <Wallet className="text-white" size={20} />
+              <div className="w-10 h-10 rounded-md flex items-center justify-center" style={{ backgroundColor: PAPER }}>
+                <Wallet style={{ color: INK }} size={20} />
               </div>
-              <h2 className="text-xl font-bold text-white">RupeeMate</h2>
+              <h2 className="font-serif text-xl font-bold" style={{ color: PAPER }}>RupeeMate</h2>
             </div>
-            <p className="text-gray-400 leading-relaxed max-w-xs">
+            <p className="leading-relaxed max-w-xs" style={{ color: LINE }}>
               Your intelligent companion for financial growth and investment
               success.
             </p>
@@ -64,7 +71,7 @@ const Footer: React.FC = () => {
           {/* Footer Sections */}
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h3 className="text-white font-semibold mb-4 text-lg">
+              <h3 className="font-semibold mb-4 text-lg" style={{ color: PAPER }}>
                 {section.title}
               </h3>
               <ul className="space-y-3">
@@ -72,7 +79,8 @@ const Footer: React.FC = () => {
                   <li key={link.text}>
                     <a
                       href={link.href}
-                      className="text-gray-400 hover:text-blue-400 transition-colors"
+                      className="transition-colors hover:text-[#D9A62B]"
+                      style={{ color: LINE }}
                     >
                       {link.text}
                     </a>
@@ -84,12 +92,11 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+        <div className="pt-8 text-center" style={{ borderTop: `1px solid ${LINE}26`, color: LINE }}>
           <p>© {currentYear} RupeeMate. All rights reserved.</p>
         </div>
       </div>
     </footer>
   );
 };
-
 export default Footer;

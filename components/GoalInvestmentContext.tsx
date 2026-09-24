@@ -4,6 +4,15 @@ import React, { useEffect, useState } from "react";
 import { Target, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+// ── Ledger palette (matches Tax Center / Manager) ──
+const INK = "#1B2B44";
+const PAPER = "#FCFAF4";
+const LINE = "#D9D0B8";
+const AMBER = "#B8860B";
+const TEAL = "#3F6B4D";
+const ROSE = "#A6432D";
+const MUTED = "#8A8371";
+
 interface Goal {
   id: string;
   name: string;
@@ -50,29 +59,29 @@ export default function GoalInvestmentContext() {
     target > 0 ? Math.min(100, (saved / target) * 100) : 0;
 
   return (
-    <div className="rounded-2xl bg-white border border-blue-100 shadow-lg p-5">
+    <div className="rounded-md shadow-sm p-5" style={{ backgroundColor: PAPER, border: `1px solid ${LINE}` }}>
 
       <div className="flex items-center justify-between mb-4">
 
         <div className="flex items-center gap-3">
 
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Target className="text-blue-600" size={20} />
+          <div className="w-10 h-10 rounded-md flex items-center justify-center" style={{ backgroundColor: `${AMBER}1A` }}>
+            <Target style={{ color: AMBER }} size={20} />
           </div>
 
           <div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs" style={{ color: MUTED }}>
               Priority Financial Goal
             </p>
 
-            <h3 className="font-bold text-gray-900">
+            <h3 className="font-serif text-lg" style={{ color: INK }}>
               {goal.name}
             </h3>
           </div>
 
         </div>
 
-        <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+        <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: `${INK}0D`, color: INK }}>
           {goal.priority}
         </span>
 
@@ -82,22 +91,22 @@ export default function GoalInvestmentContext() {
       <div className="grid grid-cols-3 gap-3 text-center mb-4">
 
         <div>
-          <p className="text-xs text-gray-500">Target</p>
-          <p className="font-bold text-gray-900">
+          <p className="text-xs" style={{ color: MUTED }}>Target</p>
+          <p className="font-bold" style={{ color: INK }}>
             ₹{target.toLocaleString()}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-gray-500">Saved</p>
-          <p className="font-bold text-emerald-600">
+          <p className="text-xs" style={{ color: MUTED }}>Saved</p>
+          <p className="font-bold" style={{ color: TEAL }}>
             ₹{saved.toLocaleString()}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-gray-500">Remaining</p>
-          <p className="font-bold text-orange-600">
+          <p className="text-xs" style={{ color: MUTED }}>Remaining</p>
+          <p className="font-bold" style={{ color: ROSE }}>
             ₹{remaining.toLocaleString()}
           </p>
         </div>
@@ -108,18 +117,18 @@ export default function GoalInvestmentContext() {
       <div className="mb-4">
 
         <div className="flex justify-between text-xs mb-1">
-          <span className="text-gray-500">Progress</span>
+          <span style={{ color: MUTED }}>Progress</span>
 
-          <span className="font-semibold text-blue-600">
+          <span className="font-semibold" style={{ color: AMBER }}>
             {progress.toFixed(0)}%
           </span>
         </div>
 
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#EFE9D8" }}>
 
           <div
-            className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
-            style={{ width: `${progress}%` }}
+            className="h-full rounded-full"
+            style={{ width: `${progress}%`, backgroundColor: AMBER }}
           />
 
         </div>
@@ -129,7 +138,8 @@ export default function GoalInvestmentContext() {
 
       <Link
         href="/calculators/sip"
-        className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-semibold transition"
+        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md font-semibold transition hover:opacity-90"
+        style={{ backgroundColor: INK, color: PAPER }}
       >
         Plan Savings for Goal
         <ArrowRight size={16} />

@@ -141,9 +141,9 @@ function IncomePulse() {
   const [active, setActive] = useState<number | null>(null);
 
   return (
-    <div className="relative w-full max-w-md rounded-2xl border border-[var(--line)] bg-[var(--canvas)] p-6 pt-10">
+    <div className="relative w-full max-w-md rounded-md border border-[var(--line)] bg-[var(--paper)] p-6 pt-10 shadow-sm">
       <motion.div
-        className="absolute -top-4 right-6 flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2 text-sm text-white"
+        className="absolute -top-4 right-6 flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2 text-sm text-[var(--paper)]"
         {...rv({ opacity: 0, y: 12 }, { opacity: 1, y: 0 }, { duration: 0.6, delay: 1.5, ease: EASE })}
       >
         <PiggyBank size={16} className="text-[var(--amber)]" />
@@ -174,11 +174,11 @@ function IncomePulse() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="pointer-events-none absolute left-1/2 z-10 whitespace-nowrap rounded-md bg-[var(--ink)] px-3 py-1.5 text-xs text-white"
+                  className="pointer-events-none absolute left-1/2 z-10 whitespace-nowrap rounded-md bg-[var(--ink)] px-3 py-1.5 text-xs text-[var(--paper)]"
                   style={{ x: "-50%", bottom: `calc(${pct}% + 2rem)` }}
                 >
                   <p className="font-medium">₹{d.amount * 10} earned</p>
-                  <p className="text-white/70">₹52 saved</p>
+                  <p className="text-[var(--paper)]/70">₹52 saved</p>
                 </motion.div>
               )}
               <motion.div
@@ -233,12 +233,12 @@ function CompareVisual() {
   return (
     <div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-5">
+        <div className="rounded-md border border-[var(--line)] bg-[var(--paper)] p-5">
           <p className="mb-4 text-sm font-medium text-[var(--ink-soft)]">Typical fixed plan</p>
-          <Bars heights={WEEK_INCOME.map(() => 50)} color="#cfcbc2" />
+          <Bars heights={WEEK_INCOME.map(() => 50)} color="#D9D0B8" />
           <p className="mt-4 text-sm text-[var(--ink-soft)]">Same amount, even on a ₹20 day.</p>
         </div>
-        <div className="rounded-2xl border border-[var(--teal)] bg-white p-5">
+        <div className="rounded-md border border-[var(--teal)] bg-[var(--paper)] p-5">
           <p className="mb-4 text-sm font-medium text-[var(--teal)]">RupeeMate</p>
           <Bars
             heights={WEEK_INCOME.map((d) => Math.max(d.amount * 0.55 * (level / 100), 8))}
@@ -257,7 +257,7 @@ function CompareVisual() {
           value={level}
           onChange={(e) => setLevel(Number(e.target.value))}
           aria-label="Simulate a slow or strong week"
-          className="h-1 flex-1 cursor-pointer accent-[var(--teal)]"
+          className="h-1 flex-1 cursor-pointer accent-[var(--amber)]"
         />
         <span>Strong week</span>
       </label>
@@ -297,19 +297,19 @@ function StepFlow() {
             onMouseEnter={() => setActive(i)}
             onFocus={() => setActive(i)}
             onBlur={() => setActive(null)}
-            className="relative rounded-lg outline-none focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--teal)]"
+            className="relative rounded-md outline-none focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--teal)]"
           >
             <motion.div
               className={`relative z-10 mb-5 flex h-12 w-12 items-center justify-center rounded-full border transition-colors duration-300 ${
                 lit
-                  ? "border-[var(--amber)] bg-[var(--teal)] text-white"
-                  : "border-[var(--teal)] bg-white text-[var(--teal)]"
+                  ? "border-[var(--amber)] bg-[var(--teal)] text-[var(--paper)]"
+                  : "border-[var(--teal)] bg-[var(--paper)] text-[var(--teal)]"
               }`}
               {...rv({ scale: 0.6 }, { scale: 1 }, { type: "spring", stiffness: 260, damping: 16, delay: 0.3 + i * 0.3 })}
             >
               <Icon size={20} />
             </motion.div>
-            <h3 className="mb-1 text-lg font-medium">{s.title}</h3>
+            <h3 className="mb-1 font-serif text-lg text-[var(--ink)]">{s.title}</h3>
             <p className="max-w-[16rem] text-sm leading-relaxed text-[var(--ink-soft)]">{s.text}</p>
           </motion.div>
         );
@@ -359,7 +359,7 @@ function SavingsVisual() {
           </div>
           <div className="h-3" style={{ width: `${r.width}%` }}>
             <motion.div
-              className="relative h-full origin-left overflow-hidden rounded-full bg-[#dcd9d0]"
+              className="relative h-full origin-left overflow-hidden rounded-full bg-[#EFE9D8]"
               {...rv({ scaleX: 0 }, { scaleX: 1 }, { duration: 0.8, delay: i * 0.2, ease: EASE })}
             >
               <div className="h-full w-1/5 bg-[var(--teal)]" />
@@ -377,7 +377,7 @@ function RiskVisual() {
     <div className="flex h-full flex-col justify-center">
       <div className="relative h-2 rounded-full" style={{ background: "linear-gradient(90deg, var(--teal), var(--amber))" }}>
         <motion.div
-          className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-white bg-[var(--ink)]"
+          className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-[var(--paper)] bg-[var(--ink)]"
           style={{ left: "35%" }}
           {...rv({ left: "0%" }, { left: "35%" }, { duration: 1.2, delay: 0.3, ease: EASE })}
         />
@@ -447,24 +447,24 @@ function FeatureCard({ f, onOpen }: { f: Feature; onOpen: () => void }) {
       whileTap={{ scale: 0.98 }}
       onMouseMove={move}
       onClick={onOpen}
-      className="group relative overflow-hidden rounded-2xl border border-[var(--line)] bg-white p-6 text-left transition-colors hover:border-[var(--teal)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--teal)]"
+      className="group relative overflow-hidden rounded-md border border-[var(--line)] bg-[var(--paper)] p-6 text-left transition-colors hover:border-[var(--teal)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--teal)]"
     >
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
           background:
-            "radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(15,76,70,0.10), transparent 70%)",
+            "radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(63,107,77,0.10), transparent 70%)",
         }}
       />
       <div className="relative">
-        <div className="mb-6 h-28 overflow-hidden rounded-lg bg-[var(--canvas)] p-4">{f.visual}</div>
+        <div className="mb-6 h-28 overflow-hidden rounded-md bg-[var(--canvas)] p-4">{f.visual}</div>
         <div className="flex items-center gap-2">
           <Icon size={18} className="text-[var(--teal)]" />
-          <h3 className="text-lg font-medium">{f.title}</h3>
+          <h3 className="font-serif text-lg text-[var(--ink)]">{f.title}</h3>
           <ArrowRight
             size={16}
-            className="ml-auto -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
+            className="ml-auto -translate-x-2 text-[var(--ink)] opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
           />
         </div>
         <p className="mt-2 text-sm text-[var(--ink-soft)]">{f.text}</p>
@@ -487,16 +487,16 @@ const HomePage: React.FC = () => {
     <div
       style={
         {
-          ["--paper" as string]: "#ffffff",
-          ["--canvas" as string]: "#f7f7f4",
-          ["--ink" as string]: "#14171f",
-          ["--ink-soft" as string]: "#5b5f68",
-          ["--teal" as string]: "#0f4c46",
-          ["--amber" as string]: "#c2760c",
-          ["--line" as string]: "#e7e5e0",
+          ["--paper" as string]: "#FCFAF4",
+          ["--canvas" as string]: "#F7F3E9",
+          ["--ink" as string]: "#1B2B44",
+          ["--ink-soft" as string]: "#5B5540",
+          ["--teal" as string]: "#3F6B4D",
+          ["--amber" as string]: "#B8860B",
+          ["--line" as string]: "#D9D0B8",
         } as React.CSSProperties
       }
-      className="bg-[var(--paper)] text-[var(--ink)]"
+      className="bg-[var(--canvas)] text-[var(--ink)]"
     >
       <motion.div
         aria-hidden
@@ -511,6 +511,9 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: EASE }}
           >
+            <div className="mb-5 inline-flex items-center gap-2 rounded-t-md bg-[var(--ink)] px-4 py-1.5 text-xs tracking-wide font-medium text-[var(--paper)]">
+              RupeeMate
+            </div>
             <h1 className="mb-6 font-serif text-5xl leading-[1.08] md:text-6xl">
               Some weeks you earn a lot.
               <br />
@@ -526,7 +529,7 @@ const HomePage: React.FC = () => {
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.97 }}
                 onClick={() => go("/hub")}
-                className="inline-flex items-center gap-2 rounded-md bg-[var(--ink)] px-7 py-3.5 font-medium text-white transition-colors hover:bg-[var(--teal)]"
+                className="inline-flex items-center gap-2 rounded-md bg-[var(--ink)] px-7 py-3.5 font-medium text-[var(--paper)] transition-colors hover:bg-[var(--teal)]"
               >
                 See your income pattern
                 <ArrowRight size={18} />
@@ -554,7 +557,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Problem */}
-      <Reveal className="bg-[var(--canvas)] px-6 py-20 md:py-28">
+      <Reveal className="bg-[var(--canvas)] border-t border-[var(--line)] px-6 py-20 md:py-28">
         <div className="mx-auto grid max-w-6xl items-center gap-x-16 gap-y-10 md:grid-cols-2">
           <motion.h2 variants={revealChild} className="font-serif text-3xl leading-tight md:text-4xl">
             Most financial tools assume a salary.
@@ -568,7 +571,7 @@ const HomePage: React.FC = () => {
       </Reveal>
 
       {/* How it works */}
-      <Reveal className="px-6 py-20 md:py-28">
+      <Reveal className="bg-[var(--paper)] px-6 py-20 md:py-28">
         <div className="mx-auto max-w-6xl">
           <motion.h2 variants={revealChild} className="mb-14 max-w-xl font-serif text-3xl md:text-4xl">
             How it adapts to your week
@@ -578,7 +581,7 @@ const HomePage: React.FC = () => {
       </Reveal>
 
       {/* Features */}
-      <Reveal className="bg-[var(--canvas)] px-6 py-20 md:py-28">
+      <Reveal className="bg-[var(--canvas)] border-t border-[var(--line)] px-6 py-20 md:py-28">
         <div className="mx-auto max-w-6xl">
           <motion.h2 variants={revealChild} className="mb-14 max-w-xl font-serif text-3xl md:text-4xl">
             What&apos;s actually inside
@@ -592,7 +595,7 @@ const HomePage: React.FC = () => {
       </Reveal>
 
       {/* Trust */}
-      <Reveal className="px-6 py-16">
+      <Reveal className="bg-[var(--paper)] px-6 py-16">
         <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-3">
           {[
             { icon: ShieldCheck, label: "Bank-grade encryption on every link" },
@@ -602,7 +605,7 @@ const HomePage: React.FC = () => {
             <motion.div
               key={label}
               variants={revealChild}
-              className="flex items-center gap-3 rounded-xl border border-[var(--line)] px-5 py-4"
+              className="flex items-center gap-3 rounded-md border border-[var(--line)] px-5 py-4"
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--canvas)] text-[var(--teal)]">
                 <Icon size={18} />
@@ -614,7 +617,7 @@ const HomePage: React.FC = () => {
       </Reveal>
 
       {/* Closing CTA */}
-      <Reveal className="border-t border-[var(--line)] px-6 py-24 md:py-32">
+      <Reveal className="border-t border-[var(--line)] bg-[var(--canvas)] px-6 py-24 md:py-32">
         <div className="mx-auto max-w-3xl text-center">
           <motion.h2 variants={revealChild} className="mb-8 font-serif text-3xl md:text-4xl">
             Start where your income already is.
@@ -624,7 +627,7 @@ const HomePage: React.FC = () => {
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.97 }}
               onClick={() => go("/hub")}
-              className="inline-flex items-center gap-2 rounded-md bg-[var(--ink)] px-8 py-4 font-medium text-white transition-colors hover:bg-[var(--teal)]"
+              className="inline-flex items-center gap-2 rounded-md bg-[var(--ink)] px-8 py-4 font-medium text-[var(--paper)] transition-colors hover:bg-[var(--teal)]"
             >
               Get started, it&apos;s free
               <ArrowRight size={18} />

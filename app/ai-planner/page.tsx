@@ -13,6 +13,17 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+// ── Ledger palette (matches Tax Center / Manager / Navbar) ──
+const INK = "#1B2B44";
+const PAPER = "#FCFAF4";
+const CANVAS = "#F7F3E9";
+const LINE = "#D9D0B8";
+const AMBER = "#B8860B";
+const TEAL = "#3F6B4D";
+const ROSE = "#A6432D";
+const MUTED = "#8A8371";
+const INK_SOFT = "#5B5540";
+
 const AIChatbotPage: React.FC = () => {
   const [planningData, setPlanningData] = useState<{
     goals: any[];
@@ -94,33 +105,33 @@ const AIChatbotPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-cyan-50">
+    <div className="min-h-screen" style={{ backgroundColor: CANVAS }}>
 
       {/* Hero Section */}
       <section className="pt-16 pb-12 px-6 relative overflow-hidden">
 
         {/* Decorative background elements */}
-        <div className="absolute top-20 right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute top-20 right-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" style={{ backgroundColor: AMBER }}></div>
 
-        <div className="absolute top-40 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" style={{ backgroundColor: TEAL }}></div>
 
         <div className="max-w-7xl mx-auto relative z-10">
 
           <div className="text-center space-y-6 mb-12">
 
-            <div className="inline-flex items-center gap-2 bg-white text-purple-600 px-5 py-2.5 rounded-full shadow-md border border-purple-100 text-sm font-semibold">
-              <Brain size={16} className="animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full shadow-sm text-sm font-semibold" style={{ backgroundColor: PAPER, color: INK, border: `1px solid ${LINE}` }}>
+              <Brain size={16} className="animate-pulse" style={{ color: AMBER }} />
               <span>AI-Powered Financial Assistant</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight" style={{ color: INK }}>
               Your Personal{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent animate-gradient">
+              <span style={{ color: AMBER }}>
                 AI Investment Advisor
               </span>
             </h1>
 
-            <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl leading-relaxed max-w-3xl mx-auto" style={{ color: INK_SOFT }}>
               Get instant answers to your financial questions. Our AI-powered
               chatbot provides personalized investment advice, savings
               strategies, and financial planning guidance 24/7.
@@ -129,23 +140,23 @@ const AIChatbotPage: React.FC = () => {
             {/* Feature Pills */}
             <div className="flex items-center justify-center gap-4 pt-4 flex-wrap">
 
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
-                <Zap className="text-yellow-500" size={18} />
-                <span className="text-sm text-gray-700 font-medium">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-md shadow-sm" style={{ backgroundColor: PAPER, border: `1px solid ${LINE}` }}>
+                <Zap style={{ color: AMBER }} size={18} />
+                <span className="text-sm font-medium" style={{ color: INK }}>
                   Instant Responses
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
-                <Shield className="text-green-500" size={18} />
-                <span className="text-sm text-gray-700 font-medium">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-md shadow-sm" style={{ backgroundColor: PAPER, border: `1px solid ${LINE}` }}>
+                <Shield style={{ color: TEAL }} size={18} />
+                <span className="text-sm font-medium" style={{ color: INK }}>
                   Secure & Private
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
-                <MessageSquare className="text-blue-500" size={18} />
-                <span className="text-sm text-gray-700 font-medium">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-md shadow-sm" style={{ backgroundColor: PAPER, border: `1px solid ${LINE}` }}>
+                <MessageSquare style={{ color: INK }} size={18} />
+                <span className="text-sm font-medium" style={{ color: INK }}>
                   24/7 Available
                 </span>
               </div>
@@ -158,20 +169,20 @@ const AIChatbotPage: React.FC = () => {
 
           <div className="max-w-5xl mx-auto mb-8">
 
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+            <div className="rounded-md shadow-sm p-6" style={{ backgroundColor: PAPER, border: `1px solid ${LINE}` }}>
 
               <div className="flex items-center gap-3 mb-6">
 
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-                  <Brain className="text-white" size={21} />
+                <div className="w-11 h-11 rounded-md flex items-center justify-center" style={{ backgroundColor: INK }}>
+                  <Brain style={{ color: PAPER }} size={21} />
                 </div>
 
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="font-serif text-xl" style={{ color: INK }}>
                     Your Financial Plan
                   </h2>
 
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm" style={{ color: MUTED }}>
                     Live context from your RupeeMate goals and tax records
                   </p>
                 </div>
@@ -184,21 +195,21 @@ const AIChatbotPage: React.FC = () => {
                 <div className="grid md:grid-cols-2 gap-5">
 
                   {/* Priority Goal */}
-                  <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-5">
+                  <div className="rounded-md p-5" style={{ backgroundColor: CANVAS, border: `1px solid ${LINE}` }}>
 
                     <div className="flex items-center gap-2 mb-3">
-                      <Target className="text-emerald-600" size={20} />
+                      <Target style={{ color: TEAL }} size={20} />
 
-                      <span className="text-sm font-semibold text-emerald-700">
+                      <span className="text-sm font-semibold" style={{ color: TEAL }}>
                         Priority Goal
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <h3 className="font-serif text-xl" style={{ color: INK }}>
                       {planningData.priorityGoal.name}
                     </h3>
 
-                    <div className="mt-3 space-y-1 text-sm text-gray-600">
+                    <div className="mt-3 space-y-1 text-sm" style={{ color: INK_SOFT }}>
 
                       <p>
                         Saved: ₹
@@ -214,7 +225,7 @@ const AIChatbotPage: React.FC = () => {
                         ).toLocaleString()}
                       </p>
 
-                      <p className="font-semibold text-emerald-700">
+                      <p className="font-semibold" style={{ color: TEAL }}>
                         Remaining: ₹
                         {Math.max(
                           0,
@@ -233,26 +244,26 @@ const AIChatbotPage: React.FC = () => {
 
 
                   {/* Tax Status */}
-                  <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 p-5">
+                  <div className="rounded-md p-5" style={{ backgroundColor: CANVAS, border: `1px solid ${LINE}` }}>
 
                     <div className="flex items-center gap-2 mb-3">
 
                       <FileText
-                        className="text-blue-600"
+                        style={{ color: AMBER }}
                         size={20}
                       />
 
-                      <span className="text-sm font-semibold text-blue-700">
+                      <span className="text-sm font-semibold" style={{ color: AMBER }}>
                         Tax Readiness
                       </span>
 
                     </div>
 
-                    <div className="space-y-2 text-sm text-gray-600">
+                    <div className="space-y-2 text-sm" style={{ color: INK_SOFT }}>
 
                       <p>
                         Recorded Income:{" "}
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold" style={{ color: INK }}>
                           ₹
                           {planningData.totalIncome.toLocaleString()}
                         </span>
@@ -261,11 +272,8 @@ const AIChatbotPage: React.FC = () => {
                       <p>
                         Missing Documents:{" "}
                         <span
-                          className={`font-semibold ${
-                            planningData.missingDocuments > 0
-                              ? "text-red-600"
-                              : "text-emerald-600"
-                          }`}
+                          className="font-semibold"
+                          style={{ color: planningData.missingDocuments > 0 ? ROSE : TEAL }}
                         >
                           {planningData.missingDocuments}
                         </span>
@@ -273,7 +281,7 @@ const AIChatbotPage: React.FC = () => {
 
                       <p>
                         Checklist Progress:{" "}
-                        <span className="font-semibold text-blue-700">
+                        <span className="font-semibold" style={{ color: AMBER }}>
                           {planningData.checklistProgress}%
                         </span>
                       </p>
@@ -286,14 +294,14 @@ const AIChatbotPage: React.FC = () => {
 
               ) : (
 
-                <div className="flex items-center gap-3 rounded-2xl bg-gray-50 p-5">
+                <div className="flex items-center gap-3 rounded-md p-5" style={{ backgroundColor: CANVAS, border: `1px solid ${LINE}` }}>
 
                   <AlertTriangle
-                    className="text-amber-500"
+                    style={{ color: AMBER }}
                     size={20}
                   />
 
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm" style={{ color: INK_SOFT }}>
                     Create a financial goal to give Finny more personalized
                     planning context.
                   </p>
@@ -313,24 +321,24 @@ const AIChatbotPage: React.FC = () => {
 
             <div className="relative">
 
-              <div className="absolute -inset-4 bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 rounded-3xl blur-2xl opacity-20"></div>
+              <div className="absolute -inset-4 rounded-md blur-2xl opacity-10" style={{ backgroundColor: AMBER }}></div>
 
-              <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+              <div className="relative rounded-md shadow-xl overflow-hidden" style={{ backgroundColor: PAPER, border: `1px solid ${LINE}` }}>
 
                 {/* Header */}
-                <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 px-6 py-4 flex items-center gap-3">
+                <div className="px-6 py-4 flex items-center gap-3" style={{ backgroundColor: INK }}>
 
-                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Sparkles className="text-white" size={20} />
+                  <div className="w-10 h-10 rounded-md flex items-center justify-center" style={{ backgroundColor: `${PAPER}26` }}>
+                    <Sparkles style={{ color: PAPER }} size={20} />
                   </div>
 
                   <div>
 
-                    <h3 className="text-white font-bold text-lg">
+                    <h3 className="font-serif font-bold text-lg" style={{ color: PAPER }}>
                       RupeeMate AI Advisor
                     </h3>
 
-                    <p className="text-white/80 text-sm">
+                    <p className="text-sm" style={{ color: LINE }}>
                       Ask me anything about investing & savings
                     </p>
 
@@ -338,9 +346,9 @@ const AIChatbotPage: React.FC = () => {
 
                   <div className="ml-auto flex items-center gap-2">
 
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: AMBER }}></div>
 
-                    <span className="text-white text-sm font-medium">
+                    <span className="text-sm font-medium" style={{ color: PAPER }}>
                       Online
                     </span>
 
@@ -350,7 +358,7 @@ const AIChatbotPage: React.FC = () => {
 
 
                 {/* Chatbot Iframe */}
-                <div className="bg-gray-50">
+                <div style={{ backgroundColor: CANVAS }}>
 
                   <iframe
                     src="https://www.chatbase.co/chatbot-iframe/WrJgnsAsSqMS7eCzk691x"
@@ -377,17 +385,17 @@ const AIChatbotPage: React.FC = () => {
 
 
       {/* What You Can Ask Section */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6" style={{ backgroundColor: PAPER }}>
 
         <div className="max-w-7xl mx-auto">
 
           <div className="text-center mb-12">
 
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="font-serif text-3xl md:text-4xl mb-4" style={{ color: INK }}>
               What Can You Ask?
             </h2>
 
-            <p className="text-lg text-gray-600">
+            <p className="text-lg" style={{ color: INK_SOFT }}>
               Our AI assistant is trained to help you with various financial topics
             </p>
 
@@ -401,28 +409,28 @@ const AIChatbotPage: React.FC = () => {
                 title: "Investment Advice",
                 description:
                   "Get recommendations on stocks, mutual funds, and SIPs",
-                gradient: "from-green-500 to-emerald-500",
+                gradient: "from-[#3F6B4D] to-[#5C7A5C]",
               },
               {
                 icon: MessageSquare,
                 title: "Savings Strategies",
                 description:
                   "Learn how to maximize your savings and reach goals faster",
-                gradient: "from-blue-500 to-cyan-500",
+                gradient: "from-[#1B2B44] to-[#33445F]",
               },
               {
                 icon: Brain,
                 title: "Financial Planning",
                 description:
                   "Create personalized plans for retirement, education, and more",
-                gradient: "from-purple-500 to-pink-500",
+                gradient: "from-[#6B4E71] to-[#8A6D3B]",
               },
               {
                 icon: Sparkles,
                 title: "Market Insights",
                 description:
                   "Understand market trends and make informed decisions",
-                gradient: "from-amber-500 to-orange-500",
+                gradient: "from-[#B8860B] to-[#C77D22]",
               },
             ].map((item, index) => {
 
@@ -432,20 +440,21 @@ const AIChatbotPage: React.FC = () => {
 
                 <div
                   key={index}
-                  className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-200 hover:border-blue-200 hover:shadow-xl transition-all transform hover:-translate-y-2"
+                  className="rounded-md p-6 transition-all transform hover:-translate-y-1"
+                  style={{ backgroundColor: CANVAS, border: `1px solid ${LINE}` }}
                 >
 
                   <div
-                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 shadow-lg`}
+                    className={`w-14 h-14 rounded-md bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 shadow`}
                   >
                     <Icon size={24} className="text-white" />
                   </div>
 
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  <h3 className="font-serif text-lg mb-2" style={{ color: INK }}>
                     {item.title}
                   </h3>
 
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-sm leading-relaxed" style={{ color: INK_SOFT }}>
                     {item.description}
                   </p>
 
@@ -462,45 +471,43 @@ const AIChatbotPage: React.FC = () => {
 
 
       {/* Tips Section */}
-      <section className="py-16 px-6 bg-gradient-to-b from-white to-blue-50">
+      <section className="py-16 px-6" style={{ backgroundColor: CANVAS }}>
 
         <div className="max-w-4xl mx-auto">
 
-          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
-
-            <div className="absolute inset-0 bg-white opacity-5"></div>
+          <div className="rounded-md p-8 md:p-12 shadow-xl relative overflow-hidden" style={{ backgroundColor: INK }}>
 
             <div className="relative z-10">
 
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-                💡 Tips for Best Results
+              <h2 className="font-serif text-2xl md:text-3xl mb-6" style={{ color: PAPER }}>
+                Tips for Best Results
               </h2>
 
-              <ul className="space-y-3 text-white/90">
+              <ul className="space-y-3" style={{ color: LINE }}>
 
                 <li className="flex items-start gap-3">
-                  <span className="text-xl">✓</span>
+                  <span className="text-xl" style={{ color: AMBER }}>✓</span>
                   <span>
                     Be specific about your financial goals and current situation
                   </span>
                 </li>
 
                 <li className="flex items-start gap-3">
-                  <span className="text-xl">✓</span>
+                  <span className="text-xl" style={{ color: AMBER }}>✓</span>
                   <span>
                     Ask about investment options that match your risk tolerance
                   </span>
                 </li>
 
                 <li className="flex items-start gap-3">
-                  <span className="text-xl">✓</span>
+                  <span className="text-xl" style={{ color: AMBER }}>✓</span>
                   <span>
                     Inquire about tax-saving strategies and investment plans
                   </span>
                 </li>
 
                 <li className="flex items-start gap-3">
-                  <span className="text-xl">✓</span>
+                  <span className="text-xl" style={{ color: AMBER }}>✓</span>
                   <span>
                     Request clarification if you don't understand any financial terms
                   </span>
@@ -538,21 +545,6 @@ const AIChatbotPage: React.FC = () => {
 
         .animation-delay-2000 {
           animation-delay: 2s;
-        }
-
-        @keyframes gradient {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-
-        .animate-gradient {
-          background-size: 200% auto;
-          animation: gradient 3s ease infinite;
         }
       `}</style>
 

@@ -1,336 +1,162 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { TrendingDown, Wallet, Calendar, Percent, PiggyBank, ArrowDownCircle, BarChart3, Info } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import React, { useMemo, useState } from "react";
+import { ArrowDownCircle, AlertTriangle, Wallet, TrendingDown, BarChart3 } from "lucide-react";
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, CartesianGrid } from "recharts";
 
-const SWPCalculator: React.FC = () => {
-  const [corpus, setCorpus] = useState<number>(500000);
-  const [monthlyWithdrawal, setMonthlyWithdrawal] = useState<number>(5000);
-  const [annualReturn, setAnnualReturn] = useState<number>(12);
-  const [duration, setDuration] = useState<number>(10);
-  const [results, setResults] = useState({
-    totalWithdrawn: 0,
-    remainingCorpus: 0,
-    totalValue: 0,
-    monthsLasted: 0
-  });
-  const [chartData, setChartData] = useState<Array<{year: number, corpus: number, withdrawn: number}>>([]);
+const fmt = (v: number): string => {
+  if (v >= 1e7) return `₹${(v / 1e7).toFixed(2)} Cr`;
+  if (v >= 1e5) return `₹${(v / 1e5).toFixed(2)} L`;
+  return `₹${Math.round(v).toLocaleString("en-IN")}`;
+};
+const fmtAxis = (v: number): string =>
+  v >= 1e7 ? `${(v / 1e7).toFixed(1)}Cr` : v >= 1e5 ? `${(v / 1e5).toFixed(0)}L` : v >= 1e3 ? `${(v / 1e3).toFixed(0)}k` : `${v}`;
 
-  useEffect(() => {
-    calculateSWP();
-  }, [corpus, monthlyWithdrawal, annualReturn, duration]);
+const inputClass =
+  "w-full bg-[#F7F3E9] border border-[#D9D0B8] rounded-md px-3.5 py-2.5 text-[#1B2B44] focus:outline-none focus:border-[#B8860B] focus:ring-1 focus:ring-[#B8860B]/40 transition-colors text-base tabular-nums";
 
-  const calculateSWP = () => {
-    const monthlyRate = annualReturn / 100 / 12;
-    const totalMonths = duration * 12;
-
-    let balance = corpus;
-    let totalWithdrawn = 0;
-    let monthsLasted = 0;
-    const yearlyData: Array<{year: number, corpus: number, withdrawn: number}> = [{year: 0, corpus: corpus, withdrawn: 0}];
-
-    for (let i = 0; i < totalMonths; i++) {
-      balance = balance * (1 + monthlyRate);
-      
-      if (balance >= monthlyWithdrawal) {
-        balance -= monthlyWithdrawal;
-        totalWithdrawn += monthlyWithdrawal;
-        monthsLasted++;
-      } else {
-        break;
-      }
-
-      // Store data yearly
-      if ((i + 1) % 12 === 0) {
-        yearlyData.push({
-          year: (i + 1) / 12,
-          corpus: Math.round(balance),
-          withdrawn: Math.round(totalWithdrawn)
-        });
-      }
-    }
-
-    setResults({
-      totalWithdrawn,
-      remainingCorpus: Math.max(0, balance),
-      totalValue: Math.max(0, balance) + totalWithdrawn,
-      monthsLasted
-    });
-    setChartData(yearlyData);
-  };
-
-  const formatCurrency = (value: number): string => {
-    if (value >= 10000000) {
-      return `₹${(value / 10000000).toFixed(2)} Cr`;
-    } else if (value >= 100000) {
-      return `₹${(value / 100000).toFixed(2)} L`;
-    }
-    return `₹${value.toLocaleString('en-IN')}`;
-  };
-
-  const withdrawalPercentage = ((monthlyWithdrawal * 12 / corpus) * 100).toFixed(2);
-  const sustainablePeriod = (results.monthsLasted / 12).toFixed(1);
-
+function Field({ label, value, display, min, max, step, onChange }: {
+  label: string; value: number; display: string; min: number; max: number; step: number; onChange: (n: number) => void;
+}) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8 mt-16">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl mb-4 shadow-2xl">
-            <ArrowDownCircle className="text-white" size={40} />
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-3">
-            Withdrawal Planner
-          </h1>
-          <p className="text-gray-600 text-xl">Design Your Systematic Withdrawal Strategy</p>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Input Section */}
-          <div className="lg:col-span-2 bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
-              <PiggyBank className="text-indigo-600" size={32} />
-              Investment Parameters
-            </h2>
-
-            <div className="space-y-8">
-              {/* Initial Corpus */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                    <Wallet size={20} className="text-indigo-600" />
-                    Investment Corpus
-                  </label>
-                  <span className="text-2xl font-bold text-gray-800">{formatCurrency(corpus)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="100000"
-                  max="10000000"
-                  step="50000"
-                  value={corpus}
-                  onChange={(e) => setCorpus(Number(e.target.value))}
-                  className="w-full h-3 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                />
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>₹1L</span>
-                  <span>₹1Cr</span>
-                </div>
-              </div>
-
-              {/* Monthly Withdrawal */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                    <ArrowDownCircle size={20} className="text-emerald-600" />
-                    Monthly Withdrawal
-                  </label>
-                  <span className="text-2xl font-bold text-emerald-600">{formatCurrency(monthlyWithdrawal)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="1000"
-                  max="200000"
-                  step="1000"
-                  value={monthlyWithdrawal}
-                  onChange={(e) => setMonthlyWithdrawal(Number(e.target.value))}
-                  className="w-full h-3 bg-emerald-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
-                />
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>₹1K</span>
-                  <span>₹2L</span>
-                </div>
-                <div className="mt-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-                  <p className="text-sm text-emerald-800">
-                    <strong>Annual Withdrawal:</strong> {formatCurrency(monthlyWithdrawal * 12)} ({withdrawalPercentage}% of corpus)
-                  </p>
-                </div>
-              </div>
-
-              {/* Expected Return */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                    <Percent size={20} className="text-purple-600" />
-                    Expected Annual Return
-                  </label>
-                  <span className="text-2xl font-bold text-purple-600">{annualReturn}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="4"
-                  max="20"
-                  step="0.5"
-                  value={annualReturn}
-                  onChange={(e) => setAnnualReturn(Number(e.target.value))}
-                  className="w-full h-3 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                />
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>4%</span>
-                  <span>20%</span>
-                </div>
-              </div>
-
-              {/* Time Horizon */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                    <Calendar size={20} className="text-pink-600" />
-                    Planning Horizon
-                  </label>
-                  <span className="text-2xl font-bold text-pink-600">{duration} Years</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="30"
-                  step="1"
-                  value={duration}
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  className="w-full h-3 bg-pink-200 rounded-lg appearance-none cursor-pointer accent-pink-600"
-                />
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>1 Year</span>
-                  <span>30 Years</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Section */}
-          <div className="space-y-6">
-            {/* Total Withdrawn Card */}
-            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl shadow-2xl p-6 transform hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <TrendingDown size={28} className="text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">Total Withdrawn</h3>
-              </div>
-              <p className="text-4xl font-bold text-white mb-2">{formatCurrency(results.totalWithdrawn)}</p>
-              <p className="text-emerald-100 text-sm">Over {sustainablePeriod} years</p>
-            </div>
-
-            {/* Remaining Corpus Card */}
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl shadow-2xl p-6 transform hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <Wallet size={28} className="text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">Remaining Corpus</h3>
-              </div>
-              <p className="text-4xl font-bold text-white mb-2">{formatCurrency(results.remainingCorpus)}</p>
-              <p className="text-indigo-100 text-sm">After withdrawal period</p>
-            </div>
-
-            {/* Total Value Card */}
-            <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-3xl shadow-2xl p-6 transform hover:scale-105 transition-all duration-300 cursor-pointer">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <BarChart3 size={28} className="text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">Total Benefit</h3>
-              </div>
-              <p className="text-4xl font-bold text-white mb-2">{formatCurrency(results.totalValue)}</p>
-              <p className="text-pink-100 text-sm">Withdrawn + Remaining</p>
-            </div>
-
-            {/* Sustainability Alert */}
-            {results.monthsLasted < duration * 12 && (
-              <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-4">
-                <div className="flex items-start gap-3">
-                  <Info size={24} className="text-yellow-600 mt-0.5" />
-                  <div>
-                    <h4 className="text-yellow-800 font-semibold mb-1">Sustainability Alert</h4>
-                    <p className="text-yellow-700 text-sm">
-                      Your corpus will last for {sustainablePeriod} years at current withdrawal rate. Consider reducing withdrawals or increasing returns.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Chart Section */}
-        <div className="mt-8 bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <BarChart3 className="text-indigo-600" size={28} />
-            Withdrawal Projection Over Time
-          </h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorCorpus" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1}/>
-                </linearGradient>
-                <linearGradient id="colorWithdrawn" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis 
-                dataKey="year" 
-                label={{ value: 'Years', position: 'insideBottom', offset: -5 }}
-                stroke="#6b7280"
-              />
-              <YAxis 
-                label={{ value: 'Amount (₹)', angle: -90, position: 'insideLeft' }}
-                stroke="#6b7280"
-                tickFormatter={(value) => formatCurrency(value)}
-              />
-              <Tooltip 
-                formatter={(value: number | string | undefined) => formatCurrency(Number(value ?? 0))}
-                contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-              />
-              <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="corpus" 
-                stroke="#6366f1" 
-                fillOpacity={1} 
-                fill="url(#colorCorpus)"
-                name="Remaining Corpus"
-              />
-              <Area 
-                type="monotone" 
-                dataKey="withdrawn" 
-                stroke="#10b981" 
-                fillOpacity={1} 
-                fill="url(#colorWithdrawn)"
-                name="Total Withdrawn"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Info Section */}
-        <div className="mt-8 bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Info className="text-indigo-600" size={28} />
-            Understanding Your Withdrawal Plan
-          </h3>
-          <div className="grid md:grid-cols-2 gap-6 text-gray-700">
-            <div>
-              <h4 className="font-semibold text-lg text-gray-800 mb-2">What is SWP?</h4>
-              <p className="text-sm leading-relaxed">
-                Systematic Withdrawal Plan lets you withdraw a fixed amount periodically from your investment while the remaining balance continues to grow, providing a steady income stream.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-lg text-gray-800 mb-2">Optimal Withdrawal Rate</h4>
-              <p className="text-sm leading-relaxed">
-                Financial experts often suggest a 4-6% annual withdrawal rate for long-term sustainability. Your current rate is <strong className="text-emerald-600">{withdrawalPercentage}%</strong>.
-              </p>
-            </div>
-          </div>
-        </div>
+    <div className="py-5 first:pt-0 last:pb-0">
+      <div className="flex items-baseline justify-between gap-3 mb-3">
+        <label className="font-serif text-lg">{label}</label>
+        <span className="font-serif text-lg text-[#B8860B] tabular-nums whitespace-nowrap">{display}</span>
       </div>
+      <input type="range" min={min} max={max} step={step} value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full h-2 cursor-pointer accent-[#B8860B] mb-3" />
+      <input type="number" inputMode="decimal" value={value} step={step}
+        onChange={(e) => onChange(Number(e.target.value))} className={inputClass} />
     </div>
   );
-};
+}
 
-export default SWPCalculator;
+export default function SWPCalculator() {
+  const [corpus, setCorpus] = useState(500000);
+  const [monthly, setMonthly] = useState(5000);
+  const [rate, setRate] = useState(12);
+  const [years, setYears] = useState(10);
+
+  const { withdrawn, remaining, monthsLasted, chart } = useMemo(() => {
+    const r = rate / 1200;
+    let bal = corpus, withdrawn = 0, monthsLasted = 0;
+    const chart = [{ year: 0, corpus: corpus, withdrawn: 0 }];
+    for (let i = 0; i < years * 12; i++) {
+      bal *= 1 + r;
+      if (bal >= monthly) { bal -= monthly; withdrawn += monthly; monthsLasted++; } else break;
+      if ((i + 1) % 12 === 0) chart.push({ year: (i + 1) / 12, corpus: Math.round(bal), withdrawn: Math.round(withdrawn) });
+    }
+    return { withdrawn, remaining: Math.max(0, bal), monthsLasted, chart };
+  }, [corpus, monthly, rate, years]);
+
+  const withdrawalPct = corpus > 0 ? ((monthly * 12) / corpus) * 100 : 0;
+  const lastYears = (monthsLasted / 12).toFixed(1);
+  const depleted = monthsLasted < years * 12;
+
+  return (
+    <main className="min-h-screen bg-[#F7F3E9] text-[#1B2B44] pt-20 pb-16 px-4 sm:px-6 font-sans overflow-x-hidden">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 bg-[#1B2B44] text-[#F7F3E9] px-4 py-1.5 rounded-t-md text-xs tracking-wide font-medium">
+            <ArrowDownCircle size={14} /> SWP Calculator
+          </div>
+          <div className="border border-[#D9D0B8] bg-[#FCFAF4] rounded-b-md rounded-tr-md px-5 py-6 sm:px-8 sm:py-8 shadow-sm">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight">A steady income from your corpus</h1>
+            <p className="text-[#5B5540] mt-3 max-w-lg text-sm sm:text-[15px] leading-relaxed">
+              Plan systematic withdrawals while the remaining balance keeps growing.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-3 border border-[#D9D0B8] rounded-md bg-[#FCFAF4] mb-8 divide-y sm:divide-y-0 sm:divide-x divide-[#D9D0B8]">
+          {[
+            { label: "Total withdrawn", value: fmt(withdrawn), sub: `Over ${lastYears} years`, color: "text-[#3F6B4D]", Icon: TrendingDown },
+            { label: "Remaining corpus", value: fmt(remaining), sub: "After withdrawal period", color: "text-[#1B2B44]", Icon: Wallet },
+            { label: "Total benefit", value: fmt(withdrawn + remaining), sub: "Withdrawn + remaining", color: "text-[#B8860B]", Icon: BarChart3 },
+          ].map(({ label, value, sub, color, Icon }) => (
+            <div key={label} className="p-5 sm:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase tracking-wide text-[#8A8371]">{label}</p>
+                <Icon size={14} className="text-[#B8860B]" />
+              </div>
+              <p className={`font-serif text-3xl tabular-nums ${color}`}>{value}</p>
+              <p className="text-sm text-[#8A8371] mt-1">{sub}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="border border-[#D9D0B8] rounded-md bg-[#FCFAF4] p-5 sm:p-8 divide-y divide-[#E7E0CC]">
+              <Field label="Investment corpus" value={corpus} display={fmt(corpus)} min={100000} max={10000000} step={50000} onChange={setCorpus} />
+              <Field label="Monthly withdrawal" value={monthly} display={fmt(monthly)} min={1000} max={200000} step={1000} onChange={setMonthly} />
+              <Field label="Expected return" value={rate} display={`${rate}%`} min={4} max={20} step={0.5} onChange={setRate} />
+              <Field label="Planning horizon" value={years} display={`${years} yrs`} min={1} max={30} step={1} onChange={setYears} />
+            </div>
+          </div>
+
+          <div className="lg:col-span-3 space-y-6">
+            {depleted && (
+              <div className="border border-[#A6432D]/40 bg-[#FCFAF4] rounded-md p-4 flex gap-3 border-l-4 border-l-[#A6432D]">
+                <AlertTriangle size={18} className="text-[#A6432D] shrink-0 mt-0.5" />
+                <p className="text-sm text-[#4A4433] leading-relaxed">
+                  Your corpus runs out after about {lastYears} years at this rate. Consider lowering withdrawals or extending returns.
+                </p>
+              </div>
+            )}
+
+            <div className="border border-[#D9D0B8] rounded-md bg-[#FCFAF4] p-4 sm:p-8">
+              <h2 className="font-serif text-xl sm:text-2xl mb-4 sm:mb-6 px-1">Withdrawal projection</h2>
+              <div className="h-64 sm:h-80 -ml-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chart} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="gCorpus" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#1B2B44" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#1B2B44" stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="#E7E0CC" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="year" stroke="#8A8371" tick={{ fontSize: 11 }} tickLine={false} />
+                    <YAxis width={44} stroke="#8A8371" tick={{ fontSize: 11 }} tickLine={false} tickFormatter={fmtAxis} />
+                    <Tooltip
+                      formatter={(v, n) => [fmt(Number(v)), n === "corpus" ? "Remaining corpus" : "Total withdrawn"]}
+                      labelFormatter={(l) => `Year ${l}`}
+                      contentStyle={{ background: "#FCFAF4", border: "1px solid #D9D0B8", borderRadius: 6, fontSize: 13 }}
+                    />
+                    <Area type="monotone" dataKey="corpus" stroke="#1B2B44" strokeWidth={2.5} fill="url(#gCorpus)" />
+                    <Area type="monotone" dataKey="withdrawn" stroke="#B8860B" strokeWidth={2} fill="none" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex justify-center gap-6 mt-3 text-xs text-[#5B5540]">
+                <span className="flex items-center gap-2"><span className="w-3 h-0.5 bg-[#1B2B44]" /> Remaining corpus</span>
+                <span className="flex items-center gap-2"><span className="w-3 h-0.5 bg-[#B8860B]" /> Total withdrawn</span>
+              </div>
+            </div>
+
+            <div className="border border-[#D9D0B8] rounded-md bg-[#FCFAF4] p-5 sm:p-8">
+              <h2 className="font-serif text-xl sm:text-2xl mb-4">Your withdrawal plan</h2>
+              <div className="divide-y divide-[#E7E0CC] text-sm">
+                <div className="flex justify-between py-3"><span className="text-[#5B5540]">Annual withdrawal</span><span className="font-medium tabular-nums">{fmt(monthly * 12)}</span></div>
+                <div className="flex justify-between py-3"><span className="text-[#5B5540]">Withdrawal rate</span>
+                  <span className={`font-medium tabular-nums ${withdrawalPct > 6 ? "text-[#A6432D]" : "text-[#3F6B4D]"}`}>{withdrawalPct.toFixed(2)}%</span></div>
+              </div>
+              <p className="text-xs text-[#8A8371] mt-4 leading-relaxed">
+                A 4–6% annual withdrawal rate is often suggested for long-term sustainability.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 border border-[#D9D0B8] rounded-md bg-[#FCFAF4] px-5 py-4">
+          <p className="text-xs text-[#8A8371] leading-relaxed">
+            Projections assume a constant return and ignore tax and exit loads. They are illustrative only.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
