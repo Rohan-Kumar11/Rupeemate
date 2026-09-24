@@ -319,39 +319,6 @@ const Navbar = () => {
                         <p className="text-sm" style={{ color: LINE }}>Signed in as</p>
                         <p className="text-sm font-medium truncate" style={{ color: PAPER }}>{user.email}</p>
                       </div>
-                      <button 
-                        onClick={() => {
-                          router.push('/profile');
-                          setShowProfileMenu(false);
-                        }}
-                        className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
-                        style={{ color: LINE }}
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Profile</span>
-                      </button>
-                      <button 
-                        onClick={() => {
-                          router.push('/savings');
-                          setShowProfileMenu(false);
-                        }}
-                        className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
-                        style={{ color: LINE }}
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        <span>My Savings</span>
-                      </button>
-                      <button 
-                        onClick={() => {
-                          router.push('/settings');
-                          setShowProfileMenu(false);
-                        }}
-                        className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
-                        style={{ color: LINE }}
-                      >
-                        <Settings className="w-4 h-4" />
-                        <span>Settings</span>
-                      </button>
                       <button
                         onClick={handleSignOut}
                         className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
@@ -506,22 +473,6 @@ const Navbar = () => {
                 >
                   <User className="w-4 h-4" />
                   <span>Profile</span>
-                </button>
-                <button
-                  onClick={() => goTo('/savings')}
-                  className="w-full flex items-center space-x-3 py-3.5 px-1"
-                  style={{ color: LINE, borderBottom: `1px solid ${LINE}26` }}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>My Savings</span>
-                </button>
-                <button
-                  onClick={() => goTo('/settings')}
-                  className="w-full flex items-center space-x-3 py-3.5 px-1"
-                  style={{ color: LINE, borderBottom: `1px solid ${LINE}26` }}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Settings</span>
                 </button>
               </>
             )}
