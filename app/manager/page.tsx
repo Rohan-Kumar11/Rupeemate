@@ -52,15 +52,21 @@ interface Transaction {
 
 type RiskProfile = 'conservative' | 'moderate' | 'aggressive';
 
-// ── Palette: navy/ink for structure, teal for growth, amber for gig-income energy, rose for outflow ──
-const INK = '#101828';
-const TEAL = '#0F6E5D';
-const AMBER = '#C77D22';
-const ROSE = '#B4444B';
-const INDIGO = '#4C4FAE';
+// ── Palette: ledger cream/navy to match the Tax Center — amber for gig-income
+// energy, forest green for growth, rust for outflow, olive/sand as earthy accents ──
+const INK = '#1B2B44';
+const TEAL = '#3F6B4D';
+const AMBER = '#B8860B';
+const ROSE = '#A6432D';
+const INDIGO = '#5C6B47';
 const SAND = '#8A6D3B';
+const PAPER = '#FCFAF4';
+const CANVAS = '#F7F3E9';
+const LINE = '#D9D0B8';
+const INK_SOFT = '#5B5540';
+const MUTED = '#8A8371';
 
-const EXPENSE_COLORS = [ROSE, AMBER, '#7C5CBF', INDIGO, '#3F8C7A', '#9A6B4F'];
+const EXPENSE_COLORS = [ROSE, AMBER, '#6B4E71', INDIGO, '#5C7A5C', '#9A6B4F'];
 const ALLOCATION_COLORS = [TEAL, INDIGO, AMBER, SAND];
 
 // Local date (YYYY-MM-DD). toISOString() returns the UTC date, which is "yesterday"
@@ -407,32 +413,35 @@ export default function FinanceDashboard() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#F6F7FB] p-4 md:p-8 pt-20 md:pt-24 font-sans text-[#101828]">
+    <div className="min-h-screen p-4 md:p-8 pt-20 md:pt-24 font-sans text-[#1B2B44]" style={{ backgroundColor: CANVAS }}>
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div className="mb-4 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Your income, on its own terms</h1>
-            <p className="text-slate-500 mt-1 max-w-xl">
+            <div className="inline-flex items-center gap-2 bg-[#1B2B44] text-[#F7F3E9] px-4 py-1.5 rounded-t-md text-xs tracking-wide font-medium mb-3">
+              Manager
+            </div>
+            <h1 className="font-serif text-3xl md:text-4xl leading-tight" style={{ color: INK }}>Your income, on its own terms</h1>
+            <p className="mt-2 max-w-xl text-[15px] leading-relaxed" style={{ color: INK_SOFT }}>
               Built for gig work: no two weeks look the same, so RupeeMate tracks the pattern behind your earnings, not just the total.
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2">
-              {isDemoMode ? <WifiOff size={16} className="text-slate-400" /> : <Wifi size={16} style={{ color: TEAL }} />}
-              <span className="text-sm text-slate-600">{isDemoMode ? 'Demo data' : 'Synced'}</span>
+            <div className="flex items-center gap-2 rounded-md px-3 py-2 border" style={{ backgroundColor: PAPER, borderColor: LINE }}>
+              {isDemoMode ? <WifiOff size={16} style={{ color: MUTED }} /> : <Wifi size={16} style={{ color: TEAL }} />}
+              <span className="text-sm" style={{ color: INK_SOFT }}>{isDemoMode ? 'Demo data' : 'Synced'}</span>
             </div>
-            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 rounded-md px-3 py-2 border" style={{ backgroundColor: PAPER, borderColor: LINE }}>
               <Gauge size={16} style={{ color: volatilityColor }} />
-              <span className="text-sm text-slate-600">Volatility:</span>
+              <span className="text-sm" style={{ color: INK_SOFT }}>Volatility:</span>
               <span className="text-sm font-semibold" style={{ color: volatilityColor }}>{volatilityLabel}</span>
             </div>
           </div>
         </div>
 
         {isDemoMode && (
-          <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+          <div className="mb-6 rounded-md px-4 py-3 text-sm flex items-center gap-2 border" style={{ backgroundColor: '#F3E9CE', borderColor: '#E3D2A0', color: '#7A5A1E' }}>
             <AlertTriangle size={16} />
             {userId
               ? "Couldn't load your saved transactions from Supabase — showing sample data so the dashboard stays usable."
@@ -440,73 +449,73 @@ export default function FinanceDashboard() {
           </div>
         )}
         {syncError && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+          <div className="mb-6 rounded-md px-4 py-3 text-sm flex items-center gap-2 border" style={{ backgroundColor: '#F3E2DC', borderColor: '#E0BDB0', color: ROSE }}>
             <AlertTriangle size={16} /> {syncError}
           </div>
         )}
 
         {loadingData ? (
-          <div className="flex items-center justify-center gap-3 py-24 text-slate-500">
+          <div className="flex items-center justify-center gap-3 py-24" style={{ color: MUTED }}>
             <Loader2 size={22} className="animate-spin" /> Loading your data…
           </div>
         ) : (
         <>
         {/* Summary strip */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 border border-slate-200 border-l-4" style={{ borderLeftColor: TEAL }}>
+          <div className="rounded-md p-6 border border-l-4" style={{ backgroundColor: PAPER, borderColor: LINE, borderLeftColor: TEAL }}>
             <div className="flex justify-between items-start mb-3">
-              <p className="text-slate-500 text-sm font-medium">Total Income</p>
+              <p className="text-sm font-medium" style={{ color: MUTED }}>Total Income</p>
               <TrendingUp size={20} style={{ color: TEAL }} />
             </div>
-            <p className="text-3xl font-bold tabular-nums">₹{totalIncome.toLocaleString()}</p>
+            <p className="font-serif text-3xl tabular-nums" style={{ color: INK }}>₹{totalIncome.toLocaleString()}</p>
             <div className="flex items-center text-sm mt-2" style={{ color: TEAL }}>
               <ArrowUpRight size={16} /><span className="ml-1">Across {incomeTxns.length} gig payouts</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 border border-slate-200 border-l-4" style={{ borderLeftColor: ROSE }}>
+          <div className="rounded-md p-6 border border-l-4" style={{ backgroundColor: PAPER, borderColor: LINE, borderLeftColor: ROSE }}>
             <div className="flex justify-between items-start mb-3">
-              <p className="text-slate-500 text-sm font-medium">Total Expenses</p>
+              <p className="text-sm font-medium" style={{ color: MUTED }}>Total Expenses</p>
               <TrendingDown size={20} style={{ color: ROSE }} />
             </div>
-            <p className="text-3xl font-bold tabular-nums">₹{totalExpense.toLocaleString()}</p>
+            <p className="font-serif text-3xl tabular-nums" style={{ color: INK }}>₹{totalExpense.toLocaleString()}</p>
             <div className="flex items-center text-sm mt-2" style={{ color: ROSE }}>
               <ArrowDownRight size={16} /><span className="ml-1">Cash outflow</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 border border-slate-200 border-l-4" style={{ borderLeftColor: INDIGO }}>
+          <div className="rounded-md p-6 border border-l-4" style={{ backgroundColor: PAPER, borderColor: LINE, borderLeftColor: INDIGO }}>
             <div className="flex justify-between items-start mb-3">
-              <p className="text-slate-500 text-sm font-medium">Net Balance</p>
+              <p className="text-sm font-medium" style={{ color: MUTED }}>Net Balance</p>
               <Wallet size={20} style={{ color: INDIGO }} />
             </div>
-            <p className="text-3xl font-bold tabular-nums">₹{netBalance.toLocaleString()}</p>
+            <p className="font-serif text-3xl tabular-nums" style={{ color: INK }}>₹{netBalance.toLocaleString()}</p>
             <div className="flex items-center text-sm mt-2" style={{ color: INDIGO }}>
               <PiggyBank size={16} /><span className="ml-1">{savingsRate}% savings rate</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 border border-slate-200 border-l-4" style={{ borderLeftColor: AMBER }}>
+          <div className="rounded-md p-6 border border-l-4" style={{ backgroundColor: PAPER, borderColor: LINE, borderLeftColor: AMBER }}>
             <div className="flex justify-between items-start mb-3">
-              <p className="text-slate-500 text-sm font-medium">Borrow/Lend Net</p>
+              <p className="text-sm font-medium" style={{ color: MUTED }}>Borrow/Lend Net</p>
               <CreditCard size={20} style={{ color: AMBER }} />
             </div>
-            <p className="text-3xl font-bold tabular-nums">₹{(totalBorrow - totalLend).toLocaleString()}</p>
-            <div className="text-sm mt-2 text-slate-500">Borrowed ₹{totalBorrow.toLocaleString()} · Lent ₹{totalLend.toLocaleString()}</div>
+            <p className="font-serif text-3xl tabular-nums" style={{ color: INK }}>₹{(totalBorrow - totalLend).toLocaleString()}</p>
+            <div className="text-sm mt-2" style={{ color: MUTED }}>Borrowed ₹{totalBorrow.toLocaleString()} · Lent ₹{totalLend.toLocaleString()}</div>
           </div>
         </div>
 
         {/* Micro-savings suggestion strip */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8 flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
+        <div className="rounded-md border p-6 mb-8 flex flex-col md:flex-row items-start md:items-center gap-4 justify-between" style={{ backgroundColor: PAPER, borderColor: LINE }}>
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg" style={{ backgroundColor: `${TEAL}1A` }}>
+            <div className="p-2 rounded-md" style={{ backgroundColor: `${TEAL}1A` }}>
               <Zap size={20} style={{ color: TEAL }} />
             </div>
             <div>
-              <p className="font-semibold">
+              <p className="font-semibold" style={{ color: INK }}>
                 {suggestedSaving > 0 ? `This was a good earning day — set aside ₹${suggestedSaving.toLocaleString()}` : 'This was a lean earning day — skip saving, protect your buffer'}
               </p>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm mt-0.5" style={{ color: MUTED }}>
                 Based on your last payout of ₹{(latestIncomeEntry?.amount ?? 0).toLocaleString()} against your average of ₹{Math.round(avgIncome).toLocaleString()}. Micro-savings scale with what you actually earn, not a fixed monthly number.
               </p>
             </div>
@@ -514,7 +523,7 @@ export default function FinanceDashboard() {
           <button
             onClick={handleAutoSave}
             disabled={suggestedSaving <= 0 || saving}
-            className="whitespace-nowrap text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            className="whitespace-nowrap text-[#FCFAF4] px-4 py-2 rounded-md text-sm font-semibold hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
             style={{ backgroundColor: INK }}
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : autoSaveConfirmed ? <CheckCircle2 size={16} /> : null}
@@ -523,11 +532,11 @@ export default function FinanceDashboard() {
         </div>
 
         {/* ── Analytics: Income pattern ── */}
-        <h2 className="text-lg font-semibold mb-3">Income pattern</h2>
+        <h2 className="font-serif text-lg mb-3" style={{ color: INK }}>Income pattern</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl border border-slate-200 p-6 lg:col-span-2">
-            <h3 className="font-semibold mb-1">Earnings per payout vs your average</h3>
-            <p className="text-sm text-slate-500 mb-4">Every dot is a real payout — the line is your rolling average.</p>
+          <div className="rounded-md border p-6 lg:col-span-2" style={{ backgroundColor: PAPER, borderColor: LINE }}>
+            <h3 className="font-semibold mb-1" style={{ color: INK }}>Earnings per payout vs your average</h3>
+            <p className="text-sm mb-4" style={{ color: MUTED }}>Every dot is a real payout — the line is your rolling average.</p>
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={volatilityData}>
                 <defs>
@@ -536,7 +545,7 @@ export default function FinanceDashboard() {
                     <stop offset="100%" stopColor={AMBER} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={LINE} />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip formatter={currencyFormatter} />
@@ -546,12 +555,12 @@ export default function FinanceDashboard() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="font-semibold mb-1">Where income comes from</h3>
-            <p className="text-sm text-slate-500 mb-4">Diversified income sources absorb slow weeks better.</p>
+          <div className="rounded-md border p-6" style={{ backgroundColor: PAPER, borderColor: LINE }}>
+            <h3 className="font-semibold mb-1" style={{ color: INK }}>Where income comes from</h3>
+            <p className="text-sm mb-4" style={{ color: MUTED }}>Diversified income sources absorb slow weeks better.</p>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={incomeBySource} layout="vertical" margin={{ left: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={LINE} />
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 10 }} />
                 <Tooltip formatter={currencyFormatter} />
@@ -562,10 +571,10 @@ export default function FinanceDashboard() {
         </div>
 
         {/* ── Analytics: Spending + trend ── */}
-        <h2 className="text-lg font-semibold mb-3">Spending &amp; cash flow</h2>
+        <h2 className="font-serif text-lg mb-3" style={{ color: INK }}>Spending &amp; cash flow</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="font-semibold mb-4">Expense breakdown</h3>
+          <div className="rounded-md border p-6" style={{ backgroundColor: PAPER, borderColor: LINE }}>
+            <h3 className="font-semibold mb-4" style={{ color: INK }}>Expense breakdown</h3>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie data={pieData} cx="50%" cy="50%" outerRadius={95} innerRadius={55} dataKey="value">
@@ -579,11 +588,11 @@ export default function FinanceDashboard() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="font-semibold mb-4">Income vs expense by month</h3>
+          <div className="rounded-md border p-6" style={{ backgroundColor: PAPER, borderColor: LINE }}>
+            <h3 className="font-semibold mb-4" style={{ color: INK }}>Income vs expense by month</h3>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <CartesianGrid strokeDasharray="3 3" stroke={LINE} />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip formatter={currencyFormatter} />
@@ -596,21 +605,21 @@ export default function FinanceDashboard() {
         </div>
 
         {/* ── Analytics: Investment + safety net + tax ── */}
-        <h2 className="text-lg font-semibold mb-3">Plan ahead</h2>
+        <h2 className="font-serif text-lg mb-3" style={{ color: INK }}>Plan ahead</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="font-semibold mb-1">Recommended allocation</h3>
-            <p className="text-sm text-slate-500 mb-3">Matched to your risk profile — not a fixed monthly SIP.</p>
+          <div className="rounded-md border p-6" style={{ backgroundColor: PAPER, borderColor: LINE }}>
+            <h3 className="font-semibold mb-1" style={{ color: INK }}>Recommended allocation</h3>
+            <p className="text-sm mb-3" style={{ color: MUTED }}>Matched to your risk profile — not a fixed monthly SIP.</p>
             <div className="flex gap-2 mb-4">
               {(['conservative', 'moderate', 'aggressive'] as RiskProfile[]).map(rp => (
                 <button
                   key={rp}
                   onClick={() => setRiskProfile(rp)}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition capitalize ${
-                    riskProfile === rp ? 'text-white border-transparent' : 'text-slate-600 border-slate-300 hover:border-slate-400'
-                  }`}
-                  style={riskProfile === rp ? { backgroundColor: INK } : {}}
+                  className="text-xs px-3 py-1.5 rounded-full border transition capitalize"
+                  style={riskProfile === rp
+                    ? { backgroundColor: INK, color: PAPER, borderColor: 'transparent' }
+                    : { color: INK_SOFT, borderColor: LINE }}
                 >
                   {rp}
                 </button>
@@ -626,49 +635,50 @@ export default function FinanceDashboard() {
                 <Tooltip formatter={percentFormatter} />
               </PieChart>
             </ResponsiveContainer>
-            <p className="text-xs text-slate-500 mt-2">{RISK_COPY[riskProfile]}</p>
+            <p className="text-xs mt-2" style={{ color: MUTED }}>{RISK_COPY[riskProfile]}</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="rounded-md border p-6" style={{ backgroundColor: PAPER, borderColor: LINE }}>
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck size={18} style={{ color: TEAL }} />
-              <h3 className="font-semibold">Emergency buffer</h3>
+              <h3 className="font-semibold" style={{ color: INK }}>Emergency buffer</h3>
             </div>
-            <p className="text-sm text-slate-500 mb-4">Target: 3 months of average expenses, so a slow gig season doesn't become a crisis.</p>
+            <p className="text-sm mb-4" style={{ color: MUTED }}>Target: 3 months of average expenses, so a slow gig season doesn't become a crisis.</p>
             <div className="flex items-end justify-between mb-2">
-              <span className="text-2xl font-bold tabular-nums">₹{Math.max(0, netBalance).toLocaleString()}</span>
-              <span className="text-sm text-slate-500">of ₹{emergencyTarget.toLocaleString()}</span>
+              <span className="text-2xl font-bold tabular-nums" style={{ color: INK }}>₹{Math.max(0, netBalance).toLocaleString()}</span>
+              <span className="text-sm" style={{ color: MUTED }}>of ₹{emergencyTarget.toLocaleString()}</span>
             </div>
-            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+            <div className="w-full h-3 rounded-full overflow-hidden" style={{ backgroundColor: '#EFE9D8' }}>
               <div
                 className="h-full rounded-full transition-all"
                 style={{ width: `${emergencyProgressPct}%`, backgroundColor: emergencyProgressPct >= 100 ? TEAL : AMBER }}
               />
             </div>
-            <p className="text-xs text-slate-500 mt-2">{emergencyProgressPct.toFixed(0)}% funded</p>
+            <p className="text-xs mt-2" style={{ color: MUTED }}>{emergencyProgressPct.toFixed(0)}% funded</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="rounded-md border p-6" style={{ backgroundColor: PAPER, borderColor: LINE }}>
             <div className="flex items-center gap-2 mb-1">
               <Receipt size={18} style={{ color: SAND }} />
-              <h3 className="font-semibold">Tax set-aside estimate</h3>
+              <h3 className="font-semibold" style={{ color: INK }}>Tax set-aside estimate</h3>
             </div>
-            <p className="text-sm text-slate-500 mb-4">
+            <p className="text-sm mb-4" style={{ color: MUTED }}>
               Illustrative only, using presumptive taxation (Sec 44AD, 8% of gross receipts) — not tax advice.
             </p>
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Estimated taxable income</span>
-                <span className="font-semibold tabular-nums">₹{estimatedTaxableIncome.toLocaleString()}</span>
+                <span style={{ color: MUTED }}>Estimated taxable income</span>
+                <span className="font-semibold tabular-nums" style={{ color: INK }}>₹{estimatedTaxableIncome.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Suggested quarterly set-aside</span>
+                <span style={{ color: MUTED }}>Suggested quarterly set-aside</span>
                 <span className="font-semibold tabular-nums" style={{ color: SAND }}>₹{suggestedTaxSetAside.toLocaleString()}</span>
               </div>
             </div>
             <button
               onClick={() => router.push('/tax-center')}
-              className="mt-4 w-full text-sm font-semibold border border-slate-300 rounded-lg py-2 hover:bg-slate-50 transition"
+              className="mt-4 w-full text-sm font-semibold rounded-md py-2 border transition hover:bg-[#F3EEDD]"
+              style={{ borderColor: LINE, color: INK }}
             >
               Open Tax Center
             </button>
@@ -679,14 +689,14 @@ export default function FinanceDashboard() {
         <div className="flex flex-wrap gap-4 mb-6">
           <button
             onClick={() => { setFormData(emptyForm); setEditingId(null); setFieldErrors({}); setShowModal(true); }}
-            className="text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:opacity-90 transition"
+            className="text-[#FCFAF4] px-6 py-3 rounded-md font-semibold flex items-center gap-2 hover:opacity-90 transition"
             style={{ backgroundColor: INK }}
           >
             <PlusCircle size={20} /> Add Transaction
           </button>
           <button
             onClick={exportData}
-            className="text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:opacity-90 transition"
+            className="text-[#FCFAF4] px-6 py-3 rounded-md font-semibold flex items-center gap-2 hover:opacity-90 transition"
             style={{ backgroundColor: TEAL }}
           >
             <Download size={20} /> Export Data
@@ -694,30 +704,30 @@ export default function FinanceDashboard() {
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="rounded-md border p-6" style={{ backgroundColor: PAPER, borderColor: LINE }}>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold">Recent Transactions</h3>
-            <span className="text-sm text-slate-500">
+            <h3 className="font-serif text-xl" style={{ color: INK }}>Recent Transactions</h3>
+            <span className="text-sm" style={{ color: MUTED }}>
               Showing {Math.min(visibleCount, transactions.length)} of {transactions.length}
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-slate-200">
-                  <th className="text-left py-3 px-4 text-slate-500 font-semibold text-sm">Date</th>
-                  <th className="text-left py-3 px-4 text-slate-500 font-semibold text-sm">Type</th>
-                  <th className="text-left py-3 px-4 text-slate-500 font-semibold text-sm">Category</th>
-                  <th className="text-left py-3 px-4 text-slate-500 font-semibold text-sm">Payment</th>
-                  <th className="text-left py-3 px-4 text-slate-500 font-semibold text-sm">Description</th>
-                  <th className="text-right py-3 px-4 text-slate-500 font-semibold text-sm">Amount</th>
-                  <th className="text-center py-3 px-4 text-slate-500 font-semibold text-sm">Actions</th>
+                <tr className="border-b-2" style={{ borderColor: LINE }}>
+                  <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: MUTED }}>Date</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: MUTED }}>Type</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: MUTED }}>Category</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: MUTED }}>Payment</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: MUTED }}>Description</th>
+                  <th className="text-right py-3 px-4 font-semibold text-sm" style={{ color: MUTED }}>Amount</th>
+                  <th className="text-center py-3 px-4 font-semibold text-sm" style={{ color: MUTED }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.slice(0, visibleCount).map((transaction) => (
-                  <tr key={transaction.id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                    <td className="py-3 px-4 text-slate-700 text-sm">{transaction.date}</td>
+                  <tr key={transaction.id} className="border-b hover:bg-[#F3EEDD] transition" style={{ borderColor: '#E7E0CC' }}>
+                    <td className="py-3 px-4 text-sm" style={{ color: INK }}>{transaction.date}</td>
                     <td className="py-3 px-4">
                       <span
                         className="px-3 py-1 rounded-full text-xs font-semibold"
@@ -735,12 +745,12 @@ export default function FinanceDashboard() {
                         {transaction.type.toUpperCase()}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-700 text-sm">
+                    <td className="py-3 px-4 text-sm" style={{ color: INK }}>
                       {transaction.category}
-                      {transaction.source && <span className="block text-xs text-slate-400">{transaction.source}</span>}
+                      {transaction.source && <span className="block text-xs" style={{ color: MUTED }}>{transaction.source}</span>}
                     </td>
-                    <td className="py-3 px-4 text-slate-500 text-sm">{transaction.payment_mode ?? '—'}</td>
-                    <td className="py-3 px-4 text-slate-500 text-sm">{transaction.description}</td>
+                    <td className="py-3 px-4 text-sm" style={{ color: MUTED }}>{transaction.payment_mode ?? '—'}</td>
+                    <td className="py-3 px-4 text-sm" style={{ color: MUTED }}>{transaction.description}</td>
                     <td
                       className="py-3 px-4 text-right font-semibold text-sm tabular-nums"
                       style={{
@@ -754,7 +764,7 @@ export default function FinanceDashboard() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex justify-center gap-2">
-                        <button onClick={() => handleEdit(transaction)} className="text-slate-500 hover:text-slate-800 transition">
+                        <button onClick={() => handleEdit(transaction)} className="hover:opacity-70 transition" style={{ color: MUTED }}>
                           <Edit2 size={17} />
                         </button>
                         <button onClick={() => handleDeleteRequest(transaction.id)} className="hover:opacity-70 transition" style={{ color: ROSE }}>
@@ -766,7 +776,7 @@ export default function FinanceDashboard() {
                 ))}
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-10 text-center text-slate-400 text-sm">
+                    <td colSpan={7} className="py-10 text-center text-sm" style={{ color: MUTED }}>
                       No transactions yet — add your first payout or expense above.
                     </td>
                   </tr>
@@ -783,7 +793,7 @@ export default function FinanceDashboard() {
                 </button>
               )}
               {visibleCount > 10 && (
-                <button onClick={() => setVisibleCount(10)} className="text-sm text-slate-500 hover:underline">
+                <button onClick={() => setVisibleCount(10)} className="text-sm hover:underline" style={{ color: MUTED }}>
                   Show less
                 </button>
               )}
@@ -796,22 +806,23 @@ export default function FinanceDashboard() {
         {/* Add/Edit Transaction Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="rounded-md shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: PAPER }}>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="text-2xl font-bold">{editingId ? 'Edit Transaction' : 'Add Transaction'}</h3>
-                  <p className="text-sm text-slate-500 mt-0.5">Log every payout and expense so your income-pattern insights stay accurate.</p>
+                  <h3 className="font-serif text-2xl" style={{ color: INK }}>{editingId ? 'Edit Transaction' : 'Add Transaction'}</h3>
+                  <p className="text-sm mt-0.5" style={{ color: MUTED }}>Log every payout and expense so your income-pattern insights stay accurate.</p>
                 </div>
                 <button
                   onClick={() => { setShowModal(false); setEditingId(null); setFormData(emptyForm); setFieldErrors({}); }}
-                  className="text-slate-500 hover:text-slate-700"
+                  className="hover:opacity-70"
+                  style={{ color: MUTED }}
                 >
                   <X size={24} />
                 </button>
               </div>
 
               {syncError && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                <div className="mb-4 rounded-md px-4 py-3 text-sm flex items-center gap-2 border" style={{ backgroundColor: '#F3E2DC', borderColor: '#E0BDB0', color: ROSE }}>
                   <AlertTriangle size={16} /> {syncError}
                 </div>
               )}
@@ -819,17 +830,17 @@ export default function FinanceDashboard() {
               <div className="space-y-4">
                 {/* Type selector as segmented control */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Type</label>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: INK }}>Type</label>
                   <div className="grid grid-cols-4 gap-2">
                     {(['income', 'expense', 'borrow', 'lend'] as Transaction['type'][]).map(t => (
                       <button
                         key={t}
                         type="button"
                         onClick={() => setFormData({ ...formData, type: t, category: '' })}
-                        className={`text-xs sm:text-sm py-2 rounded-lg border font-semibold capitalize transition ${
-                          formData.type === t ? 'text-white border-transparent' : 'text-slate-600 border-slate-300 hover:border-slate-400'
-                        }`}
-                        style={formData.type === t ? { backgroundColor: INK } : {}}
+                        className="text-xs sm:text-sm py-2 rounded-md border font-semibold capitalize transition"
+                        style={formData.type === t
+                          ? { backgroundColor: INK, color: PAPER, borderColor: 'transparent' }
+                          : { color: INK_SOFT, borderColor: LINE }}
                       >
                         {t}
                       </button>
@@ -839,24 +850,26 @@ export default function FinanceDashboard() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-2">Category</label>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: INK }}>Category</label>
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent ${fieldErrors.category ? 'border-red-400' : 'border-slate-300'}`}
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1"
+                      style={{ borderColor: fieldErrors.category ? ROSE : LINE, backgroundColor: PAPER, color: INK }}
                     >
                       <option value="">Select category</option>
                       {categories[formData.type].map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
-                    {fieldErrors.category && <p className="text-xs text-red-600 mt-1">{fieldErrors.category}</p>}
+                    {fieldErrors.category && <p className="text-xs mt-1" style={{ color: ROSE }}>{fieldErrors.category}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-2">Payment mode</label>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: INK }}>Payment mode</label>
                     <select
                       value={formData.payment_mode}
                       onChange={(e) => setFormData({ ...formData, payment_mode: e.target.value as Transaction['payment_mode'] })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1"
+                      style={{ borderColor: LINE, backgroundColor: PAPER, color: INK }}
                     >
                       <option value="UPI">UPI</option>
                       <option value="Cash">Cash</option>
@@ -869,25 +882,27 @@ export default function FinanceDashboard() {
 
                 {formData.type === 'income' && (
                   <div>
-                    <label className="block text-sm font-semibold mb-2">Platform / client</label>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: INK }}>Platform / client</label>
                     <input
                       type="text"
                       placeholder="e.g. Uber, Swiggy, a client's name"
                       value={formData.source}
                       onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent ${fieldErrors.source ? 'border-red-400' : 'border-slate-300'}`}
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1"
+                      style={{ borderColor: fieldErrors.source ? ROSE : LINE, backgroundColor: PAPER, color: INK }}
                     />
-                    {fieldErrors.source && <p className="text-xs text-red-600 mt-1">{fieldErrors.source}</p>}
+                    {fieldErrors.source && <p className="text-xs mt-1" style={{ color: ROSE }}>{fieldErrors.source}</p>}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Amount (₹)</label>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: INK }}>Amount (₹)</label>
                   <input
                     type="number"
                     value={formData.amount || ''}
                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent ${fieldErrors.amount ? 'border-red-400' : 'border-slate-300'}`}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1"
+                    style={{ borderColor: fieldErrors.amount ? ROSE : LINE, backgroundColor: PAPER, color: INK }}
                     min="0" step="100"
                   />
                   <div className="flex flex-wrap gap-2 mt-2">
@@ -896,43 +911,46 @@ export default function FinanceDashboard() {
                         key={amt}
                         type="button"
                         onClick={() => setFormData({ ...formData, amount: amt })}
-                        className="text-xs px-2.5 py-1 rounded-full border border-slate-300 text-slate-600 hover:border-slate-400 transition"
+                        className="text-xs px-2.5 py-1 rounded-full border transition"
+                        style={{ borderColor: LINE, color: INK_SOFT }}
                       >
                         ₹{amt.toLocaleString()}
                       </button>
                     ))}
                   </div>
-                  {fieldErrors.amount && <p className="text-xs text-red-600 mt-1">{fieldErrors.amount}</p>}
+                  {fieldErrors.amount && <p className="text-xs mt-1" style={{ color: ROSE }}>{fieldErrors.amount}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Date</label>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: INK }}>Date</label>
                   <input
                     type="date"
                     value={formData.date}
                     max={today()}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent ${fieldErrors.date ? 'border-red-400' : 'border-slate-300'}`}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1"
+                    style={{ borderColor: fieldErrors.date ? ROSE : LINE, backgroundColor: PAPER, color: INK }}
                   />
-                  {fieldErrors.date && <p className="text-xs text-red-600 mt-1">{fieldErrors.date}</p>}
+                  {fieldErrors.date && <p className="text-xs mt-1" style={{ color: ROSE }}>{fieldErrors.date}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Note</label>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: INK }}>Note</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent ${fieldErrors.description ? 'border-red-400' : 'border-slate-300'}`}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1"
+                    style={{ borderColor: fieldErrors.description ? ROSE : LINE, backgroundColor: PAPER, color: INK }}
                     rows={3}
                     placeholder="What was this for?"
                   />
-                  {fieldErrors.description && <p className="text-xs text-red-600 mt-1">{fieldErrors.description}</p>}
+                  {fieldErrors.description && <p className="text-xs mt-1" style={{ color: ROSE }}>{fieldErrors.description}</p>}
                 </div>
 
                 <button
                   onClick={handleSubmit}
                   disabled={saving}
-                  className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                  className="w-full text-[#FCFAF4] py-3 rounded-md font-semibold hover:opacity-90 transition disabled:opacity-60 flex items-center justify-center gap-2"
                   style={{ backgroundColor: INK }}
                 >
                   {saving && <Loader2 size={18} className="animate-spin" />}
@@ -946,19 +964,19 @@ export default function FinanceDashboard() {
         {/* Delete Confirmation Modal */}
         {deleteConfirmId !== null && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center">
+            <div className="rounded-md shadow-2xl max-w-sm w-full p-6 text-center" style={{ backgroundColor: PAPER }}>
               <div className="flex justify-center mb-4">
                 <div className="p-4 rounded-full" style={{ backgroundColor: `${ROSE}1A` }}>
                   <Trash2 style={{ color: ROSE }} size={28} />
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-2">Delete Transaction?</h3>
-              <p className="text-slate-500 mb-6">This action cannot be undone.</p>
+              <h3 className="font-serif text-xl mb-2" style={{ color: INK }}>Delete Transaction?</h3>
+              <p className="mb-6" style={{ color: MUTED }}>This action cannot be undone.</p>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteConfirmId(null)} className="flex-1 px-4 py-2 border border-slate-300 rounded-lg font-semibold hover:bg-slate-50 transition">
+                <button onClick={() => setDeleteConfirmId(null)} className="flex-1 px-4 py-2 border rounded-md font-semibold hover:bg-[#F3EEDD] transition" style={{ borderColor: LINE, color: INK }}>
                   Cancel
                 </button>
-                <button onClick={handleDeleteConfirm} className="flex-1 px-4 py-2 text-white rounded-lg font-semibold hover:opacity-90 transition" style={{ backgroundColor: ROSE }}>
+                <button onClick={handleDeleteConfirm} className="flex-1 px-4 py-2 text-[#FCFAF4] rounded-md font-semibold hover:opacity-90 transition" style={{ backgroundColor: ROSE }}>
                   Delete
                 </button>
               </div>

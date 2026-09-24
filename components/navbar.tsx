@@ -8,6 +8,15 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import AuthModal from './AuthModal';
 import ForgotPasswordModal from './ForgotPasswordModal';
 
+// ── Ledger palette (matches Tax Center / Manager) ──
+const INK = '#1B2B44';
+const INK_DEEP = '#152238';
+const PAPER = '#FCFAF4';
+const LINE = '#D9D0B8';
+const AMBER = '#B8860B';
+const TEAL = '#3F6B4D';
+const ROSE = '#A6432D';
+
 const calculators = [
   {
     id: 'mutual-funds',
@@ -15,7 +24,7 @@ const calculators = [
     description: 'Calculate SIP returns',
     icon: TrendingUp,
     href: '/calculators/MutualFunds',
-    color: 'from-blue-500 to-cyan-500'
+    color: 'from-[#3F6B4D] to-[#5C7A5C]'
   },
   {
     id: 'sip',
@@ -23,7 +32,7 @@ const calculators = [
     description: 'Plan your investments',
     icon: PiggyBank,
     href: '/calculators/sip',
-    color: 'from-emerald-500 to-teal-500'
+    color: 'from-[#B8860B] to-[#D9A62B]'
   },
   {
     id: 'swp',
@@ -31,7 +40,7 @@ const calculators = [
     description: 'Systematic withdrawal',
     icon: DollarSign,
     href: '/calculators/SWP',
-    color: 'from-purple-500 to-pink-500'
+    color: 'from-[#A6432D] to-[#C77D22]'
   }
 ];
 
@@ -175,14 +184,17 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-emerald-500/20 shadow-lg shadow-emerald-500/5 z-50">
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 shadow-lg"
+        style={{ background: `linear-gradient(to right, ${INK_DEEP}, ${INK}, ${INK_DEEP})`, borderBottom: `1px solid ${AMBER}33` }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2 cursor-pointer" onClick={() => router.push('/')}>
-              <div className="bg-gradient-to-br from-emerald-400 to-teal-500 p-2 rounded-lg">
-                <Wallet className="w-6 h-6 text-white" />
+              <div className="p-2 rounded-md" style={{ backgroundColor: PAPER }}>
+                <Wallet className="w-6 h-6" style={{ color: INK }} />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="font-serif text-2xl font-bold" style={{ color: PAPER }}>
                 RupeeMate
               </span>
             </div>
@@ -193,15 +205,15 @@ const Navbar = () => {
                 onMouseEnter={() => setShowCalculatorDropdown(true)}
                 onMouseLeave={() => setShowCalculatorDropdown(false)}
               >
-                <button className="text-slate-300 hover:text-emerald-400 transition-colors flex items-center space-x-1 group py-2">
+                <button className="transition-colors flex items-center space-x-1 group py-2" style={{ color: LINE }}>
                   <Calculator className="w-4 h-4" />
-                  <span>Features</span>
+                  <span className="group-hover:text-[#D9A62B]">Features</span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showCalculatorDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showCalculatorDropdown && (
                   <div className="absolute top-full left-0 pt-2 animate-fadeIn">
-                    <div className="bg-slate-900/98 backdrop-blur-xl border border-emerald-500/30 rounded-xl shadow-2xl shadow-black/50 p-4 w-[520px]">
+                    <div className="rounded-md shadow-2xl p-4 w-[520px]" style={{ backgroundColor: INK_DEEP, border: `1px solid ${AMBER}4D` }}>
                       <div className="grid grid-cols-3 gap-3">
                         {calculators.map((calc, index) => {
                           const Icon = calc.icon;
@@ -212,23 +224,25 @@ const Navbar = () => {
                                 router.push(calc.href);
                                 setShowCalculatorDropdown(false);
                               }}
-                              className="group relative overflow-hidden rounded-lg p-4 bg-slate-800/60 border border-slate-700/60 hover:border-emerald-500/60 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-0.5"
+                              className="group relative overflow-hidden rounded-md p-4 transition-all duration-300 hover:-translate-y-0.5"
                               style={{
+                                backgroundColor: `${PAPER}0F`,
+                                border: `1px solid ${LINE}33`,
                                 animationDelay: `${index * 50}ms`
                               }}
                             >
-                              <div className={`absolute inset-0 bg-gradient-to-br ${calc.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                              <div className={`absolute inset-0 bg-gradient-to-br ${calc.color} opacity-0 group-hover:opacity-15 transition-opacity duration-300`}></div>
                               
                               <div className="relative">
-                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${calc.color} p-2 mb-2 group-hover:scale-110 transition-transform duration-300`}>
+                                <div className={`w-10 h-10 rounded-md bg-gradient-to-br ${calc.color} p-2 mb-2 group-hover:scale-110 transition-transform duration-300`}>
                                   <Icon className="w-full h-full text-white" />
                                 </div>
                                 
-                                <h3 className="text-white font-semibold text-xs mb-0.5 group-hover:text-emerald-400 transition-colors">
+                                <h3 className="font-semibold text-xs mb-0.5 transition-colors" style={{ color: PAPER }}>
                                   {calc.name}
                                 </h3>
                                 
-                                <p className="text-slate-400 text-[10px] leading-snug">
+                                <p className="text-[10px] leading-snug" style={{ color: LINE }}>
                                   {calc.description}
                                 </p>
                               </div>
@@ -245,21 +259,23 @@ const Navbar = () => {
               
               <button 
                 onClick={() => router.push('/ai-planner')} 
-                className="relative group text-slate-300 hover:text-emerald-400 transition-colors flex items-center space-x-2"
+                className="relative group transition-colors flex items-center space-x-2"
+                style={{ color: LINE }}
               >
                 <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
-                <span>AI-planner</span>
-                <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                <span className="group-hover:text-[#D9A62B]">AI-planner</span>
+                <div className="absolute -bottom-1 left-0 right-0 h-0.5 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" style={{ backgroundColor: AMBER }}></div>
               </button>
 
               {navLinks.map((link) => (
                 <button
                   key={link.href}
                   onClick={() => router.push(link.href)}
-                  className="relative group text-slate-300 hover:text-emerald-400 transition-colors"
+                  className="relative group transition-colors"
+                  style={{ color: LINE }}
                 >
-                  <span>{link.label}</span>
-                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                  <span className="group-hover:text-[#D9A62B]">{link.label}</span>
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" style={{ backgroundColor: AMBER }}></div>
                 </button>
               ))}
             </div>
@@ -270,13 +286,15 @@ const Navbar = () => {
                 <>
                   <button
                     onClick={() => openModal(true)}
-                    className="text-slate-300 hover:text-emerald-400 transition-colors font-medium"
+                    className="transition-colors font-medium hover:text-[#D9A62B]"
+                    style={{ color: LINE }}
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => openModal(false)}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg hover:shadow-emerald-500/50 transition-all duration-300"
+                    className="px-6 py-2 rounded-md font-medium transition-all duration-300 hover:opacity-90"
+                    style={{ backgroundColor: PAPER, color: INK }}
                   >
                     Get Started
                   </button>
@@ -285,27 +303,29 @@ const Navbar = () => {
                 <div className="relative">
                   <button
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 px-4 py-2 rounded-lg hover:border-emerald-500/50 transition-all"
+                    className="flex items-center space-x-2 px-4 py-2 rounded-md transition-all"
+                    style={{ backgroundColor: `${PAPER}1A`, border: `1px solid ${AMBER}4D` }}
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: PAPER }}>
+                      <User className="w-5 h-5" style={{ color: INK }} />
                     </div>
-                    <span className="text-slate-200 font-medium">{user.email?.split('@')[0]}</span>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <span className="font-medium" style={{ color: PAPER }}>{user.email?.split('@')[0]}</span>
+                    <ChevronDown className="w-4 h-4" style={{ color: LINE }} />
                   </button>
 
                   {showProfileMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50 animate-slideDown">
-                      <div className="px-4 py-3 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-b border-slate-700">
-                        <p className="text-sm text-slate-400">Signed in as</p>
-                        <p className="text-sm font-medium text-white truncate">{user.email}</p>
+                    <div className="absolute right-0 mt-2 w-56 rounded-md shadow-xl overflow-hidden z-50 animate-slideDown" style={{ backgroundColor: INK_DEEP, border: `1px solid ${LINE}33` }}>
+                      <div className="px-4 py-3" style={{ backgroundColor: `${AMBER}14`, borderBottom: `1px solid ${LINE}33` }}>
+                        <p className="text-sm" style={{ color: LINE }}>Signed in as</p>
+                        <p className="text-sm font-medium truncate" style={{ color: PAPER }}>{user.email}</p>
                       </div>
                       <button 
                         onClick={() => {
                           router.push('/profile');
                           setShowProfileMenu(false);
                         }}
-                        className="w-full px-4 py-3 text-left text-slate-300 hover:bg-slate-700 flex items-center space-x-3 transition-colors"
+                        className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
+                        style={{ color: LINE }}
                       >
                         <User className="w-4 h-4" />
                         <span>Profile</span>
@@ -315,7 +335,8 @@ const Navbar = () => {
                           router.push('/savings');
                           setShowProfileMenu(false);
                         }}
-                        className="w-full px-4 py-3 text-left text-slate-300 hover:bg-slate-700 flex items-center space-x-3 transition-colors"
+                        className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
+                        style={{ color: LINE }}
                       >
                         <CreditCard className="w-4 h-4" />
                         <span>My Savings</span>
@@ -325,14 +346,16 @@ const Navbar = () => {
                           router.push('/settings');
                           setShowProfileMenu(false);
                         }}
-                        className="w-full px-4 py-3 text-left text-slate-300 hover:bg-slate-700 flex items-center space-x-3 transition-colors"
+                        className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
+                        style={{ color: LINE }}
                       >
                         <Settings className="w-4 h-4" />
                         <span>Settings</span>
                       </button>
                       <button
                         onClick={handleSignOut}
-                        className="w-full px-4 py-3 text-left text-red-400 hover:bg-slate-700 flex items-center space-x-3 transition-colors border-t border-slate-700"
+                        className="w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors hover:bg-[#22334F]"
+                        style={{ color: ROSE, borderTop: `1px solid ${LINE}33` }}
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Sign Out</span>
@@ -346,17 +369,18 @@ const Navbar = () => {
             {/* Mobile: avatar (if signed in) + hamburger trigger */}
             <div className="flex md:hidden items-center space-x-3">
               {user && (
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: PAPER }}>
+                  <User className="w-4 h-4" style={{ color: INK }} />
                 </div>
               )}
               <button
                 onClick={() => setShowMobileMenu(true)}
                 aria-label="Open menu"
                 aria-expanded={showMobileMenu}
-                className="relative w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/15 to-teal-500/15 border border-emerald-500/30 flex items-center justify-center active:scale-90 transition-transform"
+                className="relative w-10 h-10 rounded-md flex items-center justify-center active:scale-90 transition-transform"
+                style={{ backgroundColor: `${AMBER}26`, border: `1px solid ${AMBER}4D` }}
               >
-                <Menu className="w-5 h-5 text-emerald-400" />
+                <Menu className="w-5 h-5" style={{ color: AMBER }} />
               </button>
             </div>
           </div>
@@ -375,48 +399,51 @@ const Navbar = () => {
         />
 
         <div
-          className={`absolute top-0 right-0 h-full w-[84%] max-w-sm bg-slate-900 border-l border-emerald-500/20 shadow-2xl shadow-black/60 flex flex-col transition-transform duration-300 ease-out ${
+          className={`absolute top-0 right-0 h-full w-[84%] max-w-sm shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
             showMobileMenu ? 'translate-x-0' : 'translate-x-full'
           }`}
+          style={{ backgroundColor: INK, borderLeft: `1px solid ${AMBER}33` }}
         >
           {/* Drawer header */}
-          <div className="flex items-center justify-between px-5 h-16 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
+          <div className="flex items-center justify-between px-5 h-16" style={{ borderBottom: `1px solid ${LINE}26`, background: `linear-gradient(to right, ${INK_DEEP}, ${INK})` }}>
             <div className="flex items-center space-x-2">
-              <div className="bg-gradient-to-br from-emerald-400 to-teal-500 p-1.5 rounded-lg">
-                <Wallet className="w-5 h-5 text-white" />
+              <div className="p-1.5 rounded-md" style={{ backgroundColor: PAPER }}>
+                <Wallet className="w-5 h-5" style={{ color: INK }} />
               </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="font-serif text-lg font-bold" style={{ color: PAPER }}>
                 RupeeMate
               </span>
             </div>
             <button
               onClick={() => setShowMobileMenu(false)}
               aria-label="Close menu"
-              className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center active:scale-90 transition-transform"
+              className="w-9 h-9 rounded-md flex items-center justify-center active:scale-90 transition-transform"
+              style={{ backgroundColor: INK_DEEP, border: `1px solid ${LINE}33` }}
             >
-              <X className="w-5 h-5 text-slate-300" />
+              <X className="w-5 h-5" style={{ color: LINE }} />
             </button>
           </div>
 
           {/* Drawer body */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-1">
             {user && (
-              <div className="mb-4 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
-                <p className="text-xs text-slate-400">Signed in as</p>
-                <p className="text-sm font-medium text-white truncate">{user.email}</p>
+              <div className="mb-4 px-4 py-3 rounded-md" style={{ backgroundColor: `${AMBER}14`, border: `1px solid ${AMBER}33` }}>
+                <p className="text-xs" style={{ color: LINE }}>Signed in as</p>
+                <p className="text-sm font-medium truncate" style={{ color: PAPER }}>{user.email}</p>
               </div>
             )}
 
             {/* Features accordion */}
             <button
               onClick={() => setMobileFeaturesOpen(!mobileFeaturesOpen)}
-              className="w-full flex items-center justify-between py-3.5 px-1 text-slate-200 font-medium border-b border-slate-800"
+              className="w-full flex items-center justify-between py-3.5 px-1 font-medium"
+              style={{ color: PAPER, borderBottom: `1px solid ${LINE}26` }}
             >
               <span className="flex items-center space-x-3">
-                <Calculator className="w-4 h-4 text-emerald-400" />
+                <Calculator className="w-4 h-4" style={{ color: AMBER }} />
                 <span>Features</span>
               </span>
-              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${mobileFeaturesOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${mobileFeaturesOpen ? 'rotate-180' : ''}`} style={{ color: LINE }} />
             </button>
 
             <div
@@ -433,14 +460,15 @@ const Navbar = () => {
                       <button
                         key={calc.id}
                         onClick={() => goTo(calc.href)}
-                        className="w-full flex items-center space-x-3 p-3 rounded-lg bg-slate-800/60 border border-slate-700/60 active:border-emerald-500/60 transition-colors"
+                        className="w-full flex items-center space-x-3 p-3 rounded-md transition-colors"
+                        style={{ backgroundColor: `${PAPER}0F`, border: `1px solid ${LINE}26` }}
                       >
-                        <div className={`w-9 h-9 shrink-0 rounded-lg bg-gradient-to-br ${calc.color} p-2`}>
+                        <div className={`w-9 h-9 shrink-0 rounded-md bg-gradient-to-br ${calc.color} p-2`}>
                           <Icon className="w-full h-full text-white" />
                         </div>
                         <div className="text-left">
-                          <p className="text-sm font-semibold text-white">{calc.name}</p>
-                          <p className="text-xs text-slate-400">{calc.description}</p>
+                          <p className="text-sm font-semibold" style={{ color: PAPER }}>{calc.name}</p>
+                          <p className="text-xs" style={{ color: LINE }}>{calc.description}</p>
                         </div>
                       </button>
                     );
@@ -451,9 +479,10 @@ const Navbar = () => {
 
             <button
               onClick={() => goTo('/ai-planner')}
-              className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-200 font-medium border-b border-slate-800"
+              className="w-full flex items-center space-x-3 py-3.5 px-1 font-medium"
+              style={{ color: PAPER, borderBottom: `1px solid ${LINE}26` }}
             >
-              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <Sparkles className="w-4 h-4" style={{ color: AMBER }} />
               <span>AI-planner</span>
             </button>
 
@@ -461,7 +490,8 @@ const Navbar = () => {
               <button
                 key={link.href}
                 onClick={() => goTo(link.href)}
-                className="w-full text-left py-3.5 px-1 text-slate-200 font-medium border-b border-slate-800"
+                className="w-full text-left py-3.5 px-1 font-medium"
+                style={{ color: PAPER, borderBottom: `1px solid ${LINE}26` }}
               >
                 {link.label}
               </button>
@@ -471,21 +501,24 @@ const Navbar = () => {
               <>
                 <button
                   onClick={() => goTo('/profile')}
-                  className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-300 border-b border-slate-800"
+                  className="w-full flex items-center space-x-3 py-3.5 px-1"
+                  style={{ color: LINE, borderBottom: `1px solid ${LINE}26` }}
                 >
                   <User className="w-4 h-4" />
                   <span>Profile</span>
                 </button>
                 <button
                   onClick={() => goTo('/savings')}
-                  className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-300 border-b border-slate-800"
+                  className="w-full flex items-center space-x-3 py-3.5 px-1"
+                  style={{ color: LINE, borderBottom: `1px solid ${LINE}26` }}
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>My Savings</span>
                 </button>
                 <button
                   onClick={() => goTo('/settings')}
-                  className="w-full flex items-center space-x-3 py-3.5 px-1 text-slate-300 border-b border-slate-800"
+                  className="w-full flex items-center space-x-3 py-3.5 px-1"
+                  style={{ color: LINE, borderBottom: `1px solid ${LINE}26` }}
                 >
                   <Settings className="w-4 h-4" />
                   <span>Settings</span>
@@ -495,18 +528,20 @@ const Navbar = () => {
           </div>
 
           {/* Drawer footer actions */}
-          <div className="px-5 py-5 border-t border-slate-800">
+          <div className="px-5 py-5" style={{ borderTop: `1px solid ${LINE}26` }}>
             {!user ? (
               <div className="space-y-2">
                 <button
                   onClick={() => openModal(false)}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-lg font-medium active:scale-[0.98] transition-transform"
+                  className="w-full px-6 py-3 rounded-md font-medium active:scale-[0.98] transition-transform"
+                  style={{ backgroundColor: PAPER, color: INK }}
                 >
                   Get Started
                 </button>
                 <button
                   onClick={() => openModal(true)}
-                  className="w-full text-slate-300 px-6 py-3 rounded-lg font-medium border border-slate-700"
+                  className="w-full px-6 py-3 rounded-md font-medium"
+                  style={{ color: LINE, border: `1px solid ${LINE}4D` }}
                 >
                   Sign In
                 </button>
@@ -514,7 +549,8 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center justify-center space-x-2 text-red-400 px-6 py-3 rounded-lg font-medium border border-red-500/20 bg-red-500/5 active:scale-[0.98] transition-transform"
+                className="w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-md font-medium active:scale-[0.98] transition-transform"
+                style={{ color: ROSE, border: `1px solid ${ROSE}33`, backgroundColor: `${ROSE}0D` }}
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
