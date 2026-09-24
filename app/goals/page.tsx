@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -517,6 +517,7 @@ export default function SavingsGoalsPage() {
 
   // Goal form
   const [showForm, setShowForm] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Vehicle & Equipment");
   const [targetAmount, setTargetAmount] = useState("");
@@ -528,6 +529,17 @@ export default function SavingsGoalsPage() {
   const [upName, setUpName] = useState("");
   const [upAmount, setUpAmount] = useState("");
   const [upDate, setUpDate] = useState("");
+
+  // When "New goal" is tapped, scroll the form into view and focus its first field,
+  // so the tap is clearly felt on phones (the form sits far below the header).
+  useEffect(() => {
+    if (!showForm) return;
+    const t = setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      formRef.current?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+    }, 60);
+    return () => clearTimeout(t);
+  }, [showForm]);
 
   // ── Data loading (Step 2: data collection) ──
   const applyDemo = useCallback(() => {
@@ -971,6 +983,15 @@ export default function SavingsGoalsPage() {
 
   return (
     <main className="min-h-screen bg-[#F7F3E9] text-[#1B2B44] pt-20 pb-20 px-6 font-sans">
+      {/* Keyframes for the New goal button + form reveal */}
+      <style>{`
+        @keyframes rm-label-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rm-form-in { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes rm-ring { 0% { box-shadow: 0 0 0 0 rgba(184,134,11,0.45); } 100% { box-shadow: 0 0 0 14px rgba(184,134,11,0); } }
+        @media (prefers-reduced-motion: reduce) {
+          .rm-anim { animation: none !important; transition: none !important; }
+        }
+      `}</style>
       <div className="max-w-6xl mx-auto">
         {/* Folder-tab header */}
         <div className="mb-10">
@@ -987,9 +1008,23 @@ export default function SavingsGoalsPage() {
                   You get one clear suggestion, the reasons behind it, and the final say.
                 </p>
               </div>
-              <button onClick={() => setShowForm(!showForm)} className={`${primaryBtn} whitespace-nowrap`}>
-                <Plus size={17} />
-                New goal
+              <button
+                key={showForm ? "open" : "closed"}
+                onClick={() => setShowForm(!showForm)}
+                aria-expanded={showForm}
+                className={`${primaryBtn} rm-anim group whitespace-nowrap hover:-translate-y-0.5 hover:shadow-md active:scale-95`}
+                style={{
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease",
+                  animation: "rm-ring 0.6s ease-out",
+                }}
+              >
+                <Plus
+                  size={17}
+                  className={`rm-anim transition-transform duration-300 ${showForm ? "rotate-45" : "group-hover:rotate-90"}`}
+                />
+                <span className="rm-anim" style={{ animation: "rm-label-in 0.25s ease-out" }}>
+                  {showForm ? "Close" : "New goal"}
+                </span>
               </button>
             </div>
           </div>
@@ -1463,7 +1498,11 @@ export default function SavingsGoalsPage() {
 
             {/* New goal form */}
             {showForm && (
-              <div className={`mt-10 ${card} p-8`}>
+              <div
+                ref={formRef}
+                className={`mt-10 ${card} p-8 scroll-mt-24 rm-anim`}
+                style={{ animation: "rm-form-in 0.35s ease-out" }}
+              >
                 <h2 className="font-serif text-2xl mb-6">New goal</h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Goal name, e.g. New bike" className={inputClass} />
