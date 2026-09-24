@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Wallet } from "lucide-react";
 
 interface FooterLink {
@@ -18,7 +19,6 @@ const INK = "#1B2B44";
 const INK_DEEP = "#152238";
 const PAPER = "#FCFAF4";
 const LINE = "#D9D0B8";
-const AMBER = "#B8860B";
 
 const FOOTER_SECTIONS: FooterSection[] = [
   {
@@ -51,18 +51,32 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="pt-16 pb-8" style={{ backgroundColor: INK_DEEP, color: LINE }}>
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+    <footer
+      className="w-full overflow-hidden pt-10 pb-6 sm:pt-12 md:pt-16 md:pb-8"
+      style={{ backgroundColor: INK_DEEP, color: LINE }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-8 md:gap-12 mb-8 md:mb-12">
           {/* Brand Section */}
-          <div className="space-y-4">
+          <div className="col-span-3 md:col-span-1 space-y-3 md:space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-md flex items-center justify-center" style={{ backgroundColor: PAPER }}>
+              <div
+                className="w-9 h-9 md:w-10 md:h-10 rounded-md flex items-center justify-center shrink-0"
+                style={{ backgroundColor: PAPER }}
+              >
                 <Wallet style={{ color: INK }} size={20} />
               </div>
-              <h2 className="font-serif text-xl font-bold" style={{ color: PAPER }}>RupeeMate</h2>
+              <h2
+                className="font-serif text-lg md:text-xl font-bold"
+                style={{ color: PAPER }}
+              >
+                RupeeMate
+              </h2>
             </div>
-            <p className="leading-relaxed max-w-xs" style={{ color: LINE }}>
+            <p
+              className="text-sm md:text-base leading-relaxed max-w-xs"
+              style={{ color: LINE }}
+            >
               Your intelligent companion for financial growth and investment
               success.
             </p>
@@ -70,20 +84,23 @@ const Footer: React.FC = () => {
 
           {/* Footer Sections */}
           {FOOTER_SECTIONS.map((section) => (
-            <div key={section.title}>
-              <h3 className="font-semibold mb-4 text-lg" style={{ color: PAPER }}>
+            <div key={section.title} className="min-w-0">
+              <h3
+                className="font-semibold mb-3 md:mb-4 text-sm sm:text-base md:text-lg"
+                style={{ color: PAPER }}
+              >
                 {section.title}
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
                 {section.links.map((link) => (
                   <li key={link.text}>
-                    <a
+                    <Link
                       href={link.href}
-                      className="transition-colors hover:text-[#D9A62B]"
+                      className="inline-block py-0.5 transition-colors hover:text-[#D9A62B]"
                       style={{ color: LINE }}
                     >
                       {link.text}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -92,11 +109,15 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Copyright */}
-        <div className="pt-8 text-center" style={{ borderTop: `1px solid ${LINE}26`, color: LINE }}>
-          <p>© {currentYear} RupeeMate. All rights reserved.</p>
+        <div
+          className="pt-6 md:pt-8 text-center text-xs sm:text-sm md:text-base"
+          style={{ borderTop: `1px solid ${LINE}26`, color: LINE }}
+        >
+          <p>&copy; {currentYear} RupeeMate. All rights reserved.</p>
         </div>
       </div>
     </footer>
   );
 };
+
 export default Footer;
